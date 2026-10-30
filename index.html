@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Macau Gacha — Card Showdown</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#071310;
+  --felt:#0b1f18;
+  --gold:#d4af37; --gold2:#f0d060;
+  --red:#e63946; --yellow:#f4a900; --blue:#3a7bd5; --green:#2a9d3f;
+  --p1:#ff6b6b; --p2:#5db9ff;
+  --ink:#f5efe0;
+  --cw:88px; --ch:128px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  min-height:100vh;
+  background:radial-gradient(1100px 700px at 50% -12%, #14382a, var(--bg));
+  color:var(--ink);
+  font-family:'Segoe UI',system-ui,-apple-system,Roboto,'Helvetica Neue',Arial,sans-serif;
+}
+button{font-family:inherit}
+
+/* ---------- Header ---------- */
+header{
+  display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+  padding:14px 18px 8px; max-width:1180px; margin:0 auto;
+}
+.brand h1{
+  font-family:'Cinzel',Georgia,serif; font-weight:900;
+  font-size:clamp(22px,4vw,32px); letter-spacing:2px; margin:0; line-height:1.1;
+  background:linear-gradient(180deg,#f9e7a0,#d4af37 60%,#a8842a);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.tagline{font-size:12px; opacity:.75; margin:2px 0 0; letter-spacing:.5px}
+.hud{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.pill{
+  background:rgba(0,0,0,.4); border:1px solid rgba(212,175,55,.35);
+  padding:6px 13px; border-radius:999px; font-size:13px; font-weight:700; white-space:nowrap;
+}
+.icon-btn{
+  background:rgba(255,255,255,.08); border:1px solid rgba(212,175,55,.35);
+  border-radius:10px; width:38px; height:38px; font-size:17px; cursor:pointer; color:var(--ink);
+}
+.icon-btn:hover{background:rgba(212,175,55,.2)}
+
+/* ---------- Layout ---------- */
+main{
+  max-width:1180px; margin:0 auto;
+  display:grid; grid-template-columns:1fr 400px 1fr; gap:14px;
+  align-items:start; padding:10px 14px 4px;
+}
+@media (max-width:920px){
+  main{grid-template-columns:1fr}
+}
+
+/* ---------- Player panels ---------- */
+.player-panel{
+  position:relative;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(212,175,55,.28);
+  border-radius:18px; padding:12px 12px 10px;
+  display:flex; flex-direction:column; gap:8px;
+  min-height:225px;
+}
+.player-panel.active{
+  border-color:var(--gold);
+  box-shadow:0 0 20px rgba(212,175,55,.28);
+}
+.turn-tag{
+  position:absolute; top:-11px; right:12px;
+  background:linear-gradient(180deg,#f5dd7b,#d4af37); color:#3a2c00;
+  font-size:11px; font-weight:900; letter-spacing:1px;
+  padding:3px 10px; border-radius:999px; box-shadow:0 3px 10px rgba(0,0,0,.5);
+}
+.p-head{display:flex; align-items:center; gap:10px}
+.avatar{
+  width:44px; height:44px; border-radius:50%; flex-shrink:0;
+  display:grid; place-items:center; font-weight:900; font-size:16px;
+  border:2px solid rgba(255,255,255,.25);
+}
+.avatar.p0{background:linear-gradient(160deg,#d94848,#7c1d1d)}
+.avatar.p1{background:linear-gradient(160deg,#3f7fd9,#1c3a6e)}
+.p-name{font-weight:800; font-size:15px}
+.p-cash{font-size:14px; opacity:.9}
+.p-cash b{display:inline-block}
+.p-cash b.bump{animation:bump .55s ease}
+.badge{
+  display:inline-block; margin-top:3px; font-size:11px; font-weight:700;
+  background:rgba(212,175,55,.16); border:1px solid rgba(212,175,55,.45);
+  padding:2px 8px; border-radius:999px;
+}
+.hand{
+  display:flex; gap:7px; justify-content:center; align-items:center;
+  padding:6px 2px; min-height:calc(var(--ch) + 16px); flex-wrap:wrap;
+}
+.coll-note{
+  text-align:center; font-size:12px; font-weight:700; color:var(--gold2);
+  background:rgba(0,0,0,.3); border-radius:999px; padding:4px 10px;
+  align-self:center;
+}
+
+/* ---------- Cards ---------- */
+.card{
+  --c:var(--red);
+  width:var(--cw); height:var(--ch); flex-shrink:0;
+  background:linear-gradient(180deg,#fffdf4,#f2ebd6);
+  border:2px solid var(--c); border-radius:12px;
+  position:relative; padding:6px 4px 5px;
+  display:flex; flex-direction:column; align-items:center;
+  box-shadow:0 4px 10px rgba(0,0,0,.45);
+  font-family:inherit; text-align:center; color:#26221a;
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+.card.red{--c:var(--red)}
+.card.yellow{--c:var(--yellow)}
+.card.blue{--c:var(--blue)}
+.card.green{--c:var(--green)}
+button.card{appearance:none; cursor:pointer}
+button.card:hover:not(:disabled){transform:translateY(-5px); box-shadow:0 10px 18px rgba(0,0,0,.5)}
+.card.selected{
+  outline:3px solid var(--gold); transform:translateY(-9px);
+  box-shadow:0 12px 22px rgba(0,0,0,.55), 0 0 16px rgba(212,175,55,.5);
+}
+.c-val{
+  position:absolute; top:6px; left:6px; width:23px; height:23px; border-radius:50%;
+  background:var(--c); color:#fff; font-weight:900; font-size:13px;
+  display:grid; place-items:center; box-shadow:0 2px 4px rgba(0,0,0,.35);
+}
+.card.yellow .c-val{color:#3d2e00}
+.c-emoji{font-size:31px; margin-top:21px; line-height:1}
+.c-name{font-size:9.5px; font-weight:800; margin-top:6px; line-height:1.25}
+.c-suit{font-size:7.5px; color:#8a7f6a; margin-top:auto; font-weight:700}
+.card.big{width:112px; height:160px}
+.card.big .c-emoji{font-size:42px}
+.card.big .c-name{font-size:11px}
+.card.big .c-suit{font-size:8.5px}
+.card.won{box-shadow:0 0 0 3px var(--gold), 0 0 28px 9px rgba(212,175,55,.55)}
+.card.lost{filter:grayscale(.55) brightness(.72)}
+
+.card-back{
+  width:var(--cw); height:var(--ch); flex-shrink:0; border-radius:12px;
+  background:
+    repeating-linear-gradient(45deg, rgba(212,175,55,.15) 0 6px, transparent 6px 12px),
+    linear-gradient(160deg,#8c1d2c,#5c0e18 60%,#3f0810);
+  border:2px solid #d4af37;
+  box-shadow:0 4px 10px rgba(0,0,0,.45);
+  display:grid; place-items:center;
+  color:#e9c96a; font-family:'Cinzel',Georgia,serif; font-weight:900;
+  font-size:22px; letter-spacing:2px;
+}
+
+/* 3D flip (reveal) */
+.flip-card{width:var(--cw); height:var(--ch); perspective:900px}
+.flip-inner{
+  position:relative; width:100%; height:100%;
+  transform-style:preserve-3d;
+  transition:transform .8s cubic-bezier(.25,.8,.3,1.15);
+  transform:rotateY(0deg);
+}
+.flip-inner.face-up{transform:rotateY(180deg)}
+.flip-face{
+  position:absolute; top:0; left:0;
+  backface-visibility:hidden; -webkit-backface-visibility:hidden;
+}
+.flip-face.front{transform:rotateY(180deg)}
+.flip-face.back{
+  width:var(--cw); height:var(--ch); border-radius:12px;
+  background:
+    repeating-linear-gradient(45deg, rgba(212,175,55,.15) 0 6px, transparent 6px 12px),
+    linear-gradient(160deg,#8c1d2c,#5c0e18 60%,#3f0810);
+  border:2px solid #d4af37;
+  box-shadow:0 4px 10px rgba(0,0,0,.45);
+  display:grid; place-items:center;
+  color:#e9c96a; font-family:'Cinzel',Georgia,serif; font-weight:900;
+  font-size:22px; letter-spacing:2px;
+}
+
+/* ---------- Table ---------- */
+#table{
+  background:
+    radial-gradient(ellipse at 50% 28%, rgba(40,110,80,.45), rgba(8,26,20,.92)),
+    repeating-linear-gradient(45deg, rgba(255,255,255,.015) 0 10px, transparent 10px 20px);
+  border:1px solid rgba(212,175,55,.35); border-radius:22px;
+  padding:16px 12px 14px;
+  display:flex; flex-direction:column; gap:12px;
+  box-shadow:inset 0 0 70px rgba(0,0,0,.55);
+}
+.showdown{display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap}
+.tbl-slot{position:relative; display:grid; place-items:center; min-height:calc(var(--ch) + 20px)}
+.mid{display:flex; flex-direction:column; align-items:center; gap:9px; min-width:185px}
+.pot{
+  display:flex; flex-direction:column; align-items:center; gap:1px;
+  background:rgba(0,0,0,.38); border:1px dashed rgba(212,175,55,.55);
+  border-radius:16px; padding:9px 18px; font-size:12px; font-weight:700; letter-spacing:1px;
+  color:var(--gold2);
+}
+.pot b{font-size:25px; display:inline-block}
+.pot span{opacity:.7; font-size:10px; letter-spacing:2px}
+.pot.bump{animation:bump .55s ease}
+.status{
+  font-weight:800; font-size:14px; text-align:center; min-height:2.6em;
+  display:grid; place-items:center; line-height:1.4;
+}
+.win-tag{
+  position:absolute; top:-13px; left:50%; transform:translateX(-50%) rotate(-5deg);
+  background:linear-gradient(180deg,#f5dd7b,#d4af37); color:#3a2c00;
+  font-size:12px; font-weight:900; letter-spacing:1px;
+  padding:3px 11px; border-radius:8px; box-shadow:0 3px 10px rgba(0,0,0,.5);
+  z-index:3; white-space:nowrap;
+}
+.slot-empty{
+  width:var(--cw); height:var(--ch); border:2px dashed rgba(255,255,255,.22);
+  border-radius:12px; display:grid; place-items:center;
+  font-size:11px; opacity:.6; text-align:center; padding:4px;
+}
+.tie-note{text-align:center; font-size:11px; opacity:.65}
+.actions{display:flex; justify-content:center; gap:10px; flex-wrap:wrap}
+
+/* ---------- Buttons ---------- */
+.btn{
+  font:inherit; font-weight:800; border:none; border-radius:12px;
+  padding:11px 20px; cursor:pointer;
+  transition:transform .12s ease, box-shadow .12s ease, opacity .12s;
+}
+.btn.gold{
+  background:linear-gradient(180deg,#f5dd7b,#d4af37 55%,#b8912a);
+  color:#33270a; text-shadow:0 1px 0 rgba(255,255,255,.45);
+  box-shadow:0 5px 16px rgba(212,175,55,.35);
+}
+.btn.gold:hover:not(:disabled){transform:translateY(-2px); box-shadow:0 9px 22px rgba(212,175,55,.5)}
+.btn.ghost{background:transparent; color:var(--ink); border:1px solid rgba(255,255,255,.35)}
+.btn.ghost:hover{background:rgba(255,255,255,.07)}
+.btn:disabled{opacity:.45; cursor:not-allowed; filter:grayscale(.4)}
+.btn.big{font-size:17px; padding:14px 30px}
+
+/* ---------- Log ---------- */
+#log{
+  max-width:1180px; margin:6px auto 18px;
+  display:flex; gap:8px; overflow-x:auto; padding:4px 16px;
+  scrollbar-width:thin;
+}
+.log-pill{
+  white-space:nowrap; background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.12); border-radius:999px;
+  padding:5px 12px; font-size:12px; flex-shrink:0;
+}
+.log-pill.fresh{border-color:var(--gold); background:rgba(212,175,55,.13)}
+
+/* ---------- Overlay (pass the device) & Modal ---------- */
+#overlay,#modal{position:fixed; inset:0; display:grid; place-items:center; opacity:0; pointer-events:none; transition:opacity .2s; padding:16px}
+#overlay{background:rgba(2,8,6,.96); z-index:50}
+#modal{background:rgba(2,8,6,.8); backdrop-filter:blur(5px); z-index:60}
+#overlay.show,#modal.show{opacity:1; pointer-events:auto}
+.pass-card,.modal-card{
+  background:linear-gradient(170deg,#143527,#0a1d15);
+  border:1px solid rgba(212,175,55,.5); border-radius:22px;
+  padding:28px 26px; text-align:center;
+  box-shadow:0 30px 90px rgba(0,0,0,.7), 0 0 0 6px rgba(212,175,55,.08);
+  max-width:560px; width:100%; max-height:88vh; overflow-y:auto;
+  animation:pop .35s cubic-bezier(.2,.9,.3,1.2);
+}
+@keyframes pop{from{transform:scale(.85); opacity:0} to{transform:scale(1); opacity:1}}
+.pass-icon{font-size:44px}
+.pass-card h2{margin:8px 0 2px; font-family:'Cinzel',Georgia,serif; color:var(--gold2)}
+.pass-to{font-size:18px; margin:6px 0}
+.pass-to b{font-size:22px}
+.pass-to b.p0{color:var(--p1)}
+.pass-to b.p1{color:var(--p2)}
+.pass-reason{opacity:.8; font-size:13px; margin:6px 0 16px}
+.pass-card .btn{min-width:230px}
+
+/* Intro & gacha & rules */
+.intro-logo{
+  font-family:'Cinzel',Georgia,serif; font-weight:900; font-size:34px; letter-spacing:3px;
+  background:linear-gradient(180deg,#f9e7a0,#d4af37 60%,#a8842a);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  margin-bottom:4px;
+}
+.intro-sub{opacity:.85; margin:0 0 12px}
+.intro-suits{font-size:13px; line-height:1.9; opacity:.85; margin-bottom:14px}
+.intro-steps{
+  text-align:left; background:rgba(0,0,0,.3); border:1px solid rgba(212,175,55,.3);
+  border-radius:14px; padding:12px 16px; margin:0 auto 14px; max-width:340px;
+  font-size:13.5px; display:flex; flex-direction:column; gap:7px;
+}
+.intro-steps b{color:var(--gold2); margin-right:6px}
+.intro-meta{font-size:12px; opacity:.7; margin:0 0 18px}
+.modal-card .btn{margin:5px}
+.gacha-head{
+  font-family:'Cinzel',Georgia,serif; font-weight:900; font-size:26px; color:var(--gold2);
+  letter-spacing:2px; margin-bottom:6px;
+}
+.modal-card .sub{opacity:.9; margin:0 0 10px}
+.gacha-cash{font-size:15px; margin-bottom:8px}
+.gacha-note{
+  font-size:13px; opacity:.85; background:rgba(0,0,0,.3);
+  border:1px solid rgba(255,255,255,.15); border-radius:12px;
+  padding:9px 12px; margin:0 auto 12px; max-width:380px; line-height:1.5;
+}
+.gacha-btns{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:6px}
+.gacha-warn{color:#ffb0a0; font-size:13px; font-weight:700; margin:4px 0 0}
+.gacha-new{display:flex; justify-content:center; margin:6px 0 14px}
+.hand.center{justify-content:center; margin:2px 0 12px}
+.modal-card h2{margin:4px 0 8px; color:var(--gold2); font-family:'Cinzel',Georgia,serif}
+.rules-title{margin-top:0}
+
+/* Rules modal content */
+.rules-body{text-align:left; font-size:13.5px; line-height:1.55}
+.rules-body h3{
+  color:var(--gold2); margin:16px 0 6px; font-size:14.5px;
+  border-bottom:1px solid rgba(212,175,55,.3); padding-bottom:3px;
+}
+.rules-body p{margin:6px 0}
+.rules-body ul,.rules-body ol{margin:6px 0; padding-left:22px}
+.rules-body li{margin:4px 0}
+
+/* ---------- Results ---------- */
+.result-banner{text-align:center; margin-bottom:12px}
+.result-banner h2{
+  font-family:'Cinzel',Georgia,serif; font-size:30px; color:var(--gold2); margin:2px 0 6px;
+}
+.result-banner .winner-line{font-size:19px; font-weight:900; margin:8px 0 2px}
+.result-banner .small{font-size:12.5px; opacity:.75; margin:4px 0}
+.score-grid{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:12px}
+.score-card{
+  background:rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.18);
+  border-radius:14px; padding:12px 14px; min-width:230px; text-align:left;
+}
+.score-card.win{
+  border-color:var(--gold); background:rgba(212,175,55,.1);
+  box-shadow:0 0 18px rgba(212,175,55,.35);
+}
+.sc-name{font-weight:900; font-size:15px; margin-bottom:4px}
+.sc-name .crown{margin-left:4px}
+.sc-total{font-size:27px; font-weight:900; color:var(--gold2); margin-bottom:8px}
+.sc-total span{font-size:13px; opacity:.7}
+.sc-row{
+  display:flex; justify-content:space-between; gap:10px;
+  font-size:12.5px; padding:4px 0; border-top:1px solid rgba(255,255,255,.1);
+}
+.sc-row b{color:var(--gold2)}
+.sc-row.total{font-size:14px; border-top:2px solid rgba(212,175,55,.5); margin-top:3px; padding-top:6px}
+
+/* ---------- Confetti ---------- */
+#fx{position:fixed; inset:0; pointer-events:none; z-index:90; overflow:hidden}
+.confetti{
+  position:absolute; top:-24px; border-radius:2px;
+  animation:fall linear forwards;
+}
+@keyframes fall{
+  to{transform:translateY(112vh) rotate(720deg); opacity:.7}
+}
+@keyframes bump{
+  0%{transform:scale(1)}
+  30%{transform:scale(1.28); color:#8ff0a5}
+  100%{transform:scale(1)}
+}
+</style>
+</head>
+<body>
+
+<div id="fx"></div>
+
+<header>
+  <div class="brand">
+    <h1>🎴 MACAU GACHA</h1>
+    <p class="tagline">Macau Cultural Card Duel · Two Players or vs Computer</p>
+  </div>
+  <div class="hud">
+    <div class="pill" id="roundPill">Round 1 / 5</div>
+    <div class="pill" id="modePill">👥 2 Players</div>
+    <div class="pill">🎴 Deck <span id="deckCount">48</span></div>
+    <div class="pill">♻️ Discard <span id="discardCount">0</span></div>
+    <button class="icon-btn" id="soundBtn" data-action="sound" title="Toggle sound">🔊</button>
+    <button class="icon-btn" data-action="rules" title="How to Play">📖</button>
+  </div>
+</header>
+
+<main>
+  <section class="player-panel" id="panel0"></section>
+  <section id="table"></section>
+  <section class="player-panel" id="panel1"></section>
+</main>
+
+<div id="log"></div>
+<div id="overlay"></div>
+<div id="modal"></div>
+
+<script>
+'use strict';
+/* ================================================================
+   MACAU GACHA — Two-Player Showdown
+   A hot-seat card duel inspired by Macau's culture.
+   ================================================================ */
+
+/* ---------------- Constants & card data ---------------- */
+const ANTE = 200;          // per player, each round
+const GACHA_COST = 500;    // cost of one gacha pull
+const HAND_LIMIT = 3;      // max cards in hand
+const START_CASH = 3000;   // starting chips per player
+const TOTAL_ROUNDS = 5;
+
+const CARD_DATA = {
+  red: [
+    ["Red Envelope","🧧"], ["Firecracker","🧨"], ["Paper Lantern","🏮"],
+    ["Tangerine Tree","🍊"], ["Lion Dance","🦁"], ["Dragon Boat Race","🛶"],
+    ["Festival Drum","🥁"], ["Fireworks Display","🎆"], ["Dragon Dance","🐉"],
+    ["Drunken Dragon Parade","🐲"], ["A-Ma Festival Procession","⛩️"], ["Lunar New Year Gala","🎊"]
+  ],
+  yellow: [
+    ["Almond Cookie","🍪"], ["Pork Chop Bun","🍔"], ["Egg Tart","🥧"],
+    ["Beef Jerky","🥓"], ["Serradura Pudding","🍮"], ["Crab Congee","🦀"],
+    ["Minchi","🍛"], ["African Chicken","🍗"], ["Portuguese Seafood Rice","🥘"],
+    ["Cha Gordo Tea Feast","🫖"], ["Dim Sum Feast","🥟"], ["Imperial Banquet","🍲"]
+  ],
+  blue: [
+    ["Hac Sa Beach","🏖️"], ["Coloane Village","🏡"], ["Taipa Houses","🏘️"],
+    ["St. Dominic's Church","⛪"], ["Senado Square","🛕"], ["A-Ma Temple","🏯"],
+    ["Guia Fortress & Lighthouse","🗼"], ["Macau Tower","🌉"], ["Ruins of St. Paul's","🏛️"],
+    ["Kun Iam Statue","🗽"], ["Grand Lisboa Skyline","🌃"], ["Historic Centre of Macau","🏰"]
+  ],
+  green: [
+    ["Coin Pusher","🪙"], ["Claw Machine","🧸"], ["Arcade Corner","🕹️"],
+    ["Karaoke Night","🎤"], ["Golden Reel","🎡"], ["VR Experience","🥽"],
+    ["House of Dancing Water","💃"], ["Cotai Strip Resorts","🏨"], ["Macau Grand Prix","🏎️"],
+    ["Concert Arena","🎪"], ["Mega Casino Resort","🎰"], ["High Roller Suite","🃏"]
+  ]
+};
+
+const COLOR_META = {
+  red:    { label: "Festive Heritage",      rank: 3, chip: "🔴" },
+  yellow: { label: "Gastronomy",            rank: 2, chip: "🟡" },
+  blue:   { label: "Landmarks",             rank: 1, chip: "🔵" },
+  green:  { label: "Modern Entertainment",  rank: 0, chip: "🟢" }
+};
+
+/* ---------------- Game state ---------------- */
+let deck = [], discard = [], players = [];
+let round = 1, pot = 0;
+let phase = 'start'; // start | p1pick | p2pick | reveal | draw | p1gacha | p2gacha | over
+let pendingPlay = [null, null];
+let revealResolved = false, revealMsg = '', lastWinner = 0;
+let gachaPlayer = null, gachaNewCard = null, gachaDiscard = null;
+let endKind = null, endWinner = 0; // 'normal' | 'bankrupt' | 'double'
+let passCallback = null;
+let aiMode = false; // true = single-player: Player 2 is the built-in computer
+let aiTimer = null; // pending computer action timer
+let lastCash = [START_CASH, START_CASH], potLast = 0;
+let battleLog = [];
+
+/* ---------------- Small helpers ---------------- */
+const $ = id => document.getElementById(id);
+const fmt = n => '$' + n.toLocaleString('en-US');
+function pName(pi){ return aiMode ? (pi === 0 ? 'You' : 'Computer') : 'Player ' + (pi + 1); }
+function pVerb(pi, v){ return (aiMode && pi === 0) ? v.replace(/s$/, '') : v; }
+
+function shuffle(a){
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildDeck(){
+  const d = [];
+  let id = 0;
+  for (const color of Object.keys(CARD_DATA)){
+    CARD_DATA[color].forEach((entry, i) => {
+      d.push({ id: id++, color, value: i + 1, name: entry[0], emoji: entry[1] });
+    });
+  }
+  return shuffle(d);
+}
+
+function makePlayer(){
+  return { cash: START_CASH, hand: [], played: null, gachas: 0 };
+}
+
+function addLog(s){
+  battleLog.push(s);
+  if (battleLog.length > 40) battleLog.shift();
+}
+
+/* ---------------- Sound (WebAudio, no assets) ---------------- */
+let soundOn = false;
+try { soundOn = localStorage.getItem('macauGachaSound') !== 'off'; } catch(e){}
+let actx = null;
+
+function ensureAudio(){
+  if (!soundOn) return;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return;
+  if (!actx) actx = new AC();
+  if (actx.state === 'suspended') actx.resume();
+}
+
+function tone(freq, dur, type, vol, delay){
+  if (!soundOn || !actx) return;
+  const t0 = actx.currentTime + (delay || 0);
+  const o = actx.createOscillator(), g = actx.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  o.connect(g); g.connect(actx.destination);
+  g.gain.setValueAtTime(vol, t0);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.start(t0); o.stop(t0 + dur + 0.03);
+}
+
+const sfx = {
+  click: () => tone(700, 0.06, 'triangle', 0.07),
+  flip:  () => { tone(320, 0.05, 'square', 0.04); tone(520, 0.07, 'triangle', 0.06, 0.05); },
+  draw:  () => tone(620, 0.09, 'sine', 0.07),
+  win:   () => { tone(523, 0.11, 'triangle', 0.1); tone(659, 0.11, 'triangle', 0.1, 0.1); tone(784, 0.22, 'triangle', 0.1, 0.2); },
+  lose:  () => { tone(392, 0.14, 'sawtooth', 0.05); tone(311, 0.24, 'sawtooth', 0.05, 0.12); },
+  gacha: () => { tone(880, 0.08, 'square', 0.05); tone(1175, 0.08, 'square', 0.05, 0.07); tone(1568, 0.16, 'square', 0.06, 0.14); },
+  bankrupt: () => { tone(300, 0.28, 'sawtooth', 0.09); tone(250, 0.28, 'sawtooth', 0.09, 0.24); tone(180, 0.5, 'sawtooth', 0.1, 0.48); }
+};
+
+function toggleSound(){
+  soundOn = !soundOn;
+  try { localStorage.setItem('macauGachaSound', soundOn ? 'on' : 'off'); } catch(e){}
+  const b = $('soundBtn');
+  if (b) b.textContent = soundOn ? '🔊' : '🔇';
+  if (soundOn){ ensureAudio(); sfx.click(); }
+}
+
+/* ---------------- Card comparison ---------------- */
+function compare(a, b){
+  if (a.value !== b.value) return a.value > b.value ? 1 : 2;
+  if (COLOR_META[a.color].rank === COLOR_META[b.color].rank) return 0; // exact tie (shouldn't happen)
+  return COLOR_META[a.color].rank > COLOR_META[b.color].rank ? 1 : 2;
+}
+
+/* ---------------- Scoring ---------------- */
+function collectionOf(p){
+  const cnt = {};
+  p.hand.forEach(c => { cnt[c.color] = (cnt[c.color] || 0) + 1; });
+  const best = Math.max(0, ...Object.values(cnt));
+  return best >= 3 ? 9 : (best === 2 ? 4 : 0);
+}
+
+function scoreOf(p){
+  const cash = Math.floor(p.cash / 100);
+  const coll = collectionOf(p);
+  const rat = p.gachas === 0 ? 5 : 0;
+  return { cash, coll, rat, total: cash + coll + rat };
+}
+
+function collDesc(p){
+  const cnt = {};
+  p.hand.forEach(c => { cnt[c.color] = (cnt[c.color] || 0) + 1; });
+  const best = Math.max(0, ...Object.values(cnt));
+  if (best >= 3){
+    const col = Object.keys(cnt).find(k => cnt[k] >= 3);
+    return "3× " + COLOR_META[col].chip + " " + COLOR_META[col].label;
+  }
+  if (best === 2){
+    const col = Object.keys(cnt).find(k => cnt[k] === 2);
+    return "2× " + COLOR_META[col].chip + " " + COLOR_META[col].label;
+  }
+  return "no matching suits";
+}
+
+/* ---------------- Game flow ---------------- */
+function newGame(withIntro){
+  deck = buildDeck();
+  discard = [];
+  players = [makePlayer(), makePlayer()];
+  players.forEach(p => { for (let i = 0; i < 3; i++) p.hand.push(deck.pop()); });
+  round = 1; pot = 0;
+  phase = 'start';
+  pendingPlay = [null, null];
+  revealResolved = false; revealMsg = ''; lastWinner = 0;
+  gachaPlayer = null; gachaNewCard = null; gachaDiscard = null;
+  endKind = null; endWinner = 0;
+  lastCash = [players[0].cash, players[1].cash]; potLast = 0;
+  battleLog = [];
+  clearTimeout(aiTimer);
+  hidePass(); closeModal();
+  addLog("🎴 Game ready — 48 cultural cards shuffled.");
+  render();
+  if (withIntro){ openIntro(); }
+  else { beginRound(1, true); }
+}
+
+function startGame(vsAI){
+  aiMode = vsAI;
+  newGame(false);
+}
+
+function beginRound(n, withPass){
+  round = n;
+  // Bankruptcy check: can't pay the $200 ante?
+  const broke = [players[0].cash < ANTE, players[1].cash < ANTE];
+  if (broke[0] || broke[1]){
+    if (broke[0] && broke[1]){
+      endKind = 'double';
+      addLog("💸 BOTH players can't pay the $200 ante — scores will decide!");
+    } else {
+      endKind = 'bankrupt';
+      endWinner = broke[0] ? 2 : 1;
+      addLog("💸 " + pName(broke[0] ? 0 : 1) + " can't pay the $" + ANTE + " ante — BANKRUPT! " + pName(endWinner - 1) + " " + pVerb(endWinner - 1, 'wins') + "!");
+    }
+    endGame();
+    return;
+  }
+  players.forEach(p => { p.played = null; });
+  pendingPlay = [null, null];
+  revealResolved = false; revealMsg = ''; lastWinner = 0;
+  gachaNewCard = null; gachaDiscard = null;
+  phase = 'p1pick';
+  const ante = () => {
+    players[0].cash -= ANTE; players[1].cash -= ANTE;
+    pot = ANTE * 2;
+    addLog("🪙 Round " + n + " — both players ante $" + ANTE + " (pot " + fmt(pot) + ").");
+    render(); sfx.draw();
+  };
+  if (withPass && !aiMode){ showPass(0, "Round " + n + " begins — ante $" + ANTE + " each", ante); }
+  else { ante(); }
+}
+
+function onPick(pi, id){
+  if (phase !== (pi === 0 ? 'p1pick' : 'p2pick')) return;
+  if (aiMode && pi === 1) return;
+  pendingPlay[pi] = pendingPlay[pi] === id ? null : id;
+  sfx.click(); render();
+}
+
+function confirmPlay(pi){
+  if (pendingPlay[pi] == null) return;
+  const idx = players[pi].hand.findIndex(c => c.id === pendingPlay[pi]);
+  if (idx < 0) return;
+  players[pi].played = players[pi].hand.splice(idx, 1)[0];
+  pendingPlay[pi] = null;
+  addLog("🂠 " + pName(pi) + " " + pVerb(pi, 'plays') + " a card face-down.");
+  sfx.flip(); render();
+  if (pi === 0){
+    if (aiMode){ phase = 'p2pick'; render(); aiSchedulePlay(); }
+    else showPass(1, "your turn — choose a card face-down", () => { phase = 'p2pick'; render(); });
+  } else {
+    phase = 'reveal'; render();
+    setTimeout(flipReveal, 600);
+  }
+}
+
+function flipReveal(){
+  document.querySelectorAll('.flip-inner').forEach(el => el.classList.add('face-up'));
+  sfx.flip();
+  setTimeout(resolveReveal, 950);
+}
+
+function resolveReveal(){
+  const c1 = players[0].played, c2 = players[1].played;
+  const w = compare(c1, c2);
+  if (w === 0){
+    players[0].cash += ANTE; players[1].cash += ANTE; pot = 0;
+    revealMsg = "🤝 Exact tie — both antes returned!";
+    lastWinner = 0;
+    sfx.lose();
+  } else {
+    players[w - 1].cash += pot; pot = 0;
+    lastWinner = w;
+    const wc = w === 1 ? c1 : c2, lc = w === 1 ? c2 : c1;
+    if (c1.value === c2.value){
+      revealMsg = "⚔️ Tie on " + c1.value + "! Suit rank decides: " +
+        COLOR_META[wc.color].chip + " " + COLOR_META[wc.color].label + " beats " +
+        COLOR_META[lc.color].chip + " " + COLOR_META[lc.color].label +
+        " — " + pName(w - 1) + " " + pVerb(w - 1, 'takes') + " the " + fmt(ANTE * 2) + " pot!";
+    } else {
+      revealMsg = "⚔️ " + c1.name + " (" + c1.value + ") vs " + c2.name + " (" + c2.value +
+        ") — " + pName(w - 1) + " " + pVerb(w - 1, 'takes') + " the " + fmt(ANTE * 2) + " pot!";
+    }
+    sfx.win(); confetti(40);
+  }
+  discard.push(c1, c2);
+  addLog(revealMsg);
+  revealResolved = true;
+  render();
+}
+
+function continueAfterReveal(){
+  phase = 'draw';
+  let drew = false;
+  players.forEach(p => {
+    if (deck.length && p.hand.length < HAND_LIMIT){ p.hand.push(deck.pop()); drew = true; }
+  });
+  addLog(drew ? "📥 Both players draw 1 free card (hand limit 3)." : "📥 Free draw skipped — deck empty.");
+  render(); sfx.draw();
+  if (aiMode){ phase = 'p1gacha'; render(); openGachaModal(0); }
+  else showPass(0, "Gacha Time is coming!", () => { phase = 'p1gacha'; render(); openGachaModal(0); });
+}
+
+/* ---------------- Gacha ---------------- */
+function openGachaModal(pi){
+  gachaPlayer = pi; gachaDiscard = null; gachaNewCard = null;
+  const p = players[pi];
+  const canPay = p.cash >= GACHA_COST && deck.length > 0;
+  const why = deck.length === 0
+    ? "The deck is empty!"
+    : "You need " + fmt(GACHA_COST) + " to pull — you only have " + fmt(p.cash) + ".";
+  openModal(
+    '<div class="gacha-head">🎰 GACHA TIME!</div>' +
+    '<p class="sub">Player ' + (pi + 1) + ' — the gacha machine awaits…</p>' +
+    '<div class="gacha-cash">Your cash: 💰 <b>' + fmt(p.cash) + '</b></div>' +
+    '<p class="gacha-note">Spend <b>' + fmt(GACHA_COST) + '</b> to draw 1 extra card from the deck.<br>' +
+    'If your hand is full, you must discard 1 old card. Skipping is free.</p>' +
+    '<div class="gacha-btns">' +
+      '<button class="btn gold" data-action="gacha-yes"' + (canPay ? '' : ' disabled') + '>🎰 Gacha — ' + fmt(GACHA_COST) + '</button>' +
+      '<button class="btn ghost" data-action="gacha-no">Skip</button>' +
+    '</div>' +
+    (canPay ? '' : '<p class="gacha-warn">⚠️ ' + why + '</p>')
+  );
+  sfx.draw();
+}
+
+function gachaYes(){
+  const pi = gachaPlayer, p = players[pi];
+  if (p.cash < GACHA_COST || !deck.length) return;
+  p.cash -= GACHA_COST; p.gachas++;
+  gachaNewCard = deck.pop();
+  addLog("🎰 Player " + (pi + 1) + " pulled a gacha for " + fmt(GACHA_COST) + "!");
+  sfx.gacha(); render();
+  renderGachaResult();
+}
+
+function renderGachaResult(){
+  const pi = gachaPlayer, p = players[pi];
+  let h =
+    '<div class="gacha-head">✨ New Card!</div>' +
+    '<p class="sub">Player ' + (pi + 1) + ' — you pulled:</p>' +
+    '<div class="gacha-new">' + cardHTML(gachaNewCard, 'big') + '</div>';
+  if (p.hand.length >= HAND_LIMIT){
+    h += '<p class="gacha-note">Your hand is full — <b>discard 1 old card</b> to keep the new one.</p>' +
+      '<div class="hand center">' +
+      p.hand.map(c =>
+        '<button class="card ' + c.color + (gachaDiscard === c.id ? ' selected' : '') +
+        '" data-action="gacha-pick" data-id="' + c.id + '">' + cardInner(c) + '</button>'
+      ).join('') +
+      '</div>' +
+      '<button class="btn gold" data-action="gacha-confirm"' + (gachaDiscard == null ? ' disabled' : '') + '>✔ Keep New Card</button>';
+  } else {
+    h += '<button class="btn gold" data-action="gacha-confirm">✔ Add to Hand</button>';
+  }
+  openModal(h);
+}
+
+function gachaPick(id){
+  gachaDiscard = gachaDiscard === id ? null : id;
+  sfx.click();
+  renderGachaResult();
+}
+
+function gachaConfirm(){
+  const pi = gachaPlayer, p = players[pi];
+  if (gachaDiscard != null){
+    const i = p.hand.findIndex(c => c.id === gachaDiscard);
+    if (i >= 0){
+      const gone = p.hand.splice(i, 1)[0];
+      discard.push(gone);
+      addLog("🗑️ Player " + (pi + 1) + " discarded " + gone.name + " to make room.");
+    }
+  }
+  p.hand.push(gachaNewCard);
+  addLog("✨ Player " + (pi + 1) + " added " + gachaNewCard.name + " (" + gachaNewCard.value + ") to their hand.");
+  gachaNewCard = null; gachaDiscard = null;
+  sfx.click(); closeModal();
+  gachaDone(pi);
+}
+
+function gachaNo(){
+  const pi = gachaPlayer;
+  addLog("🚫 Player " + (pi + 1) + " skipped the gacha.");
+  sfx.click(); closeModal();
+  gachaDone(pi);
+}
+
+function gachaDone(pi){
+  render();
+  if (pi === 0){
+    if (aiMode){ phase = 'p2gacha'; render(); aiScheduleGacha(); }
+    else showPass(1, "Gacha Time is coming!", () => { phase = 'p2gacha'; render(); openGachaModal(1); });
+  } else if (round >= TOTAL_ROUNDS){
+    endKind = 'normal';
+    endGame();
+  } else if (aiMode){
+    beginRound(round + 1, false);
+  } else {
+    showPass(0, "Round " + round + " complete — Round " + (round + 1) + " is next!", () => { beginRound(round + 1, false); });
+  }
+}
+
+function endGame(){
+  phase = 'over';
+  hidePass(); closeModal();
+  if (endKind === 'bankrupt') sfx.bankrupt(); else sfx.win();
+  render();
+  confetti(endKind === 'normal' ? 120 : 60);
+}
+
+/* ---------------- Computer opponent (Player 2) ---------------- */
+function aiSchedulePlay(){
+  clearTimeout(aiTimer);
+  aiTimer = setTimeout(aiPlayCard, 900);
+}
+
+function aiPlayCard(){
+  if (phase !== 'p2pick') return;
+  const c = aiChooseCard(1);
+  if (!c) return;
+  const idx = players[1].hand.findIndex(x => x.id === c.id);
+  if (idx < 0) return;
+  pendingPlay[1] = null;
+  players[1].played = players[1].hand.splice(idx, 1)[0];
+  addLog("🂠 " + pName(1) + " " + pVerb(1, 'plays') + " a card face-down.");
+  sfx.flip();
+  phase = 'reveal'; render();
+  setTimeout(flipReveal, 600);
+}
+
+function aiScheduleGacha(){
+  clearTimeout(aiTimer);
+  aiTimer = setTimeout(aiGachaDecision, 900);
+}
+
+function aiGachaDecision(){
+  if (phase !== 'p2gacha') return;
+  const p = players[1];
+  const canPay = p.cash >= GACHA_COST && deck.length > 0;
+  if (canPay && aiWantGacha()){
+    p.cash -= GACHA_COST; p.gachas++;
+    const nc = deck.pop();
+    let discNote = '';
+    if (p.hand.length >= HAND_LIMIT){
+      const gone = aiChooseDiscard();
+      const i = p.hand.findIndex(c => c.id === gone.id);
+      if (i >= 0){ p.hand.splice(i, 1)[0]; discard.push(gone); discNote = ' It discarded ' + gone.name + ' to make room.'; }
+    }
+    p.hand.push(nc);
+    addLog("🤖 " + pName(1) + " pulled a gacha for " + fmt(GACHA_COST) + "! New card: " + nc.name + " (" + nc.value + ")." + discNote);
+    sfx.gacha();
+  } else {
+    addLog("🤖 " + pName(1) + (canPay ? " skipped the gacha." : " can't afford the gacha."));
+  }
+  render();
+  gachaDone(1);
+}
+
+function aiWantGacha(){
+  // A gacha costs $500 (5 pts) and forfeits the +5 Rational Spender bonus,
+  // so the computer mostly skips — it only gambles with a comfortable bankroll.
+  const p = players[1];
+  if (p.cash < 1800) return false;
+  const cnt = aiSuitCounts(p.hand);
+  const hasPair = Object.values(cnt).some(n => n >= 2);
+  if (hasPair && Math.random() < 0.3) return true; // small chance to complete a 3-of-a-suit
+  return Math.random() < 0.06;                     // rare impulse pull
+}
+
+function aiSuitCounts(hand){
+  const cnt = {};
+  hand.forEach(c => { cnt[c.color] = (cnt[c.color] || 0) + 1; });
+  return cnt;
+}
+
+function aiWinProb(c, unknown){
+  let w = 0;
+  for (const u of unknown){
+    if (c.value !== u.value){ if (c.value > u.value) w++; }
+    else if (COLOR_META[c.color].rank > COLOR_META[u.color].rank) w++;
+  }
+  return w / unknown.length;
+}
+
+function aiCollCost(hand, c){
+  const before = collectionOf({ hand });
+  const after = collectionOf({ hand: hand.filter(x => x.id !== c.id) });
+  return before - after; // suit points lost by removing this card
+}
+
+function aiChooseCard(pi){
+  const p = players[pi];
+  if (!p.hand.length) return null;
+  const opp = players[1 - pi];
+  const unknown = deck.concat(opp.hand, opp.played ? [opp.played] : []); // cards the AI can't see
+  if (!unknown.length) return p.hand[0];
+  const roundsLeft = TOTAL_ROUNDS - round + 1;
+
+  // How hard the computer pushes for this pot.
+  let aggression = 1;
+  if (opp.cash < ANTE * 3) aggression = 2.2;    // winning this pot bankrupts the opponent
+  else if (p.cash < ANTE * 3) aggression = 2.2; // losing this pot is fatal
+  else if (p.cash < opp.cash) aggression = 1.2;
+  else if (roundsLeft <= 1) aggression = 0.8;   // protecting a lead — play safe
+
+  let best = null, bestScore = -Infinity;
+  for (const c of p.hand){
+    const potEV = (2 * aiWinProb(c, unknown) - 1) * ANTE; // expected $ from the pot
+    const collCost = aiCollCost(p.hand, c) * 100;          // end-game suit points lost
+    const retention = (roundsLeft > 1 && c.value >= 8 && aggression < 1) ? c.value * 12 : 0;
+    const noise = Math.random() * 30;                      // human-like imperfection
+    const score = potEV * aggression - collCost - retention + noise;
+    if (score > bestScore){ bestScore = score; best = c; }
+  }
+  return best;
+}
+
+function aiChooseDiscard(){
+  const hand = players[1].hand;
+  const cnt = aiSuitCounts(hand);
+  let best = null, bestScore = Infinity;
+  for (const c of hand){
+    const score = cnt[c.color] * 100 + c.value; // keep suits paired, drop low singletons first
+    if (score < bestScore){ bestScore = score; best = c; }
+  }
+  return best;
+}
+
+/* ---------------- Rendering ---------------- */
+function cardInner(c){
+  return '<div class="c-val">' + c.value + '</div>' +
+    '<div class="c-emoji">' + c.emoji + '</div>' +
+    '<div class="c-name">' + c.name + '</div>' +
+    '<div class="c-suit">' + COLOR_META[c.color].chip + ' ' + COLOR_META[c.color].label + '</div>';
+}
+
+function cardHTML(c, extra){
+  return '<div class="card ' + c.color + (extra ? ' ' + extra : '') + '">' + cardInner(c) + '</div>';
+}
+
+function backHTML(){
+  return '<div class="card-back"><span>MG</span></div>';
+}
+
+function playedHTML(pi){
+  const p = players[pi];
+  if (!p.played) return '<div class="slot-empty">Awaiting card…</div>';
+  if (phase === 'reveal' || phase === 'draw'){
+    if (revealResolved){
+      const cls = lastWinner === pi + 1 ? 'won' : (lastWinner ? 'lost' : '');
+      return cardHTML(p.played, cls);
+    }
+    return '<div class="flip-card"><div class="flip-inner">' +
+      '<div class="flip-face card ' + p.played.color + ' front">' + cardInner(p.played) + '</div>' +
+      '<div class="flip-face back">MG</div>' +
+      '</div></div>';
+  }
+  if (phase === 'over') return cardHTML(p.played);
+  return backHTML(); // face-down during the picking phase
+}
+
+function renderHud(){
+  const rp = $('roundPill');
+  if (rp) rp.textContent = phase === 'over' ? 'Game Over' : 'Round ' + round + ' / ' + TOTAL_ROUNDS;
+  const mp = $('modePill');
+  if (mp) mp.textContent = aiMode ? '🤖 vs Computer' : '👥 2 Players';
+  const dc = $('deckCount'); if (dc) dc.textContent = deck.length;
+  const sc = $('discardCount'); if (sc) sc.textContent = discard.length;
+}
+
+function renderPlayer(pi){
+  const p = players[pi], panel = $('panel' + pi);
+  if (!panel) return;
+  const isAI = aiMode && pi === 1;
+  const isTurn = (phase === 'p1pick' && pi === 0) || (phase === 'p2pick' && pi === 1);
+  const showHand = (isTurn && !isAI) || phase === 'over' || (aiMode && pi === 0);
+  const handHTML = !showHand
+    ? p.hand.map(() => backHTML()).join('')
+    : isTurn
+      ? p.hand.map(c =>
+          '<button type="button" class="card ' + c.color + (pendingPlay[pi] === c.id ? ' selected' : '') +
+          '" data-action="pick" data-id="' + c.id + '">' + cardInner(c) + '</button>'
+        ).join('')
+      : p.hand.map(c => cardHTML(c)).join('');
+  panel.className = 'player-panel' + (isTurn ? ' active' : '');
+  panel.innerHTML =
+    (isTurn ? '<div class="turn-tag">' + (isAI ? '🤖 THINKING…' : '▶ YOUR TURN') + '</div>' : '') +
+    '<div class="p-head">' +
+      '<div class="avatar p' + pi + '">' + (isAI ? '🤖' : 'P' + (pi + 1)) + '</div>' +
+      '<div class="p-info">' +
+        '<div class="p-name">' + pName(pi) + '</div>' +
+        '<div class="p-cash">💰 <b>' + fmt(p.cash) + '</b></div>' +
+        (p.gachas > 0 ? '<span class="badge">🎰 Gacha ×' + p.gachas + '</span>' : '') +
+      '</div>' +
+    '</div>' +
+    '<div class="hand">' + handHTML + '</div>' +
+    (phase === 'over' ? '<div class="coll-note">Collection: ' + collDesc(p) + ' → +' + collectionOf(p) + ' pts</div>' : '');
+  if (lastCash[pi] !== p.cash){
+    lastCash[pi] = p.cash;
+    const el = panel.querySelector('.p-cash b');
+    if (el) el.classList.add('bump');
+  }
+}
+
+function renderTable(){
+  const t = $('table');
+  if (!t) return;
+  if (phase === 'over'){
+    t.innerHTML = renderResultsHTML();
+    return;
+  }
+  let status = '', actions = '';
+  switch (phase){
+    case 'start':
+      status = 'Ready to play?';
+      actions = '<button class="btn gold" data-action="start">🎮 Start Game</button>';
+      break;
+    case 'p1pick':
+      status = 'Player 1 — pick a card & play it face-down';
+      actions = '<button class="btn gold" data-action="confirm-play"' + (pendingPlay[0] != null ? '' : ' disabled') + '>🂠 Play Face-Down</button>';
+      break;
+    case 'p2pick':
+      if (aiMode){
+        status = '🤖 Computer is choosing a card…';
+        actions = '';
+      } else {
+        status = 'Player 2 — pick a card & play it face-down';
+        actions = '<button class="btn gold" data-action="confirm-play"' + (pendingPlay[1] != null ? '' : ' disabled') + '>🂠 Play Face-Down</button>';
+      }
+      break;
+    case 'reveal':
+      status = revealResolved ? revealMsg : 'Showdown!';
+      actions = revealResolved ? '<button class="btn gold" data-action="reveal-continue">Continue ➜</button>' : '';
+      break;
+    case 'draw':
+      status = '📥 Free cards drawn — Gacha incoming!';
+      actions = '';
+      break;
+    case 'p1gacha': case 'p2gacha':
+      status = (aiMode && phase === 'p2gacha') ? '🤖 Computer is deciding on the Gacha…' : '🎰 Gacha Time!';
+      actions = '';
+      break;
+  }
+  t.innerHTML =
+    '<div class="showdown">' +
+      '<div class="tbl-slot">' + playedHTML(0) + (revealResolved && lastWinner === 1 ? '<div class="win-tag">WINNER</div>' : '') + '</div>' +
+      '<div class="mid">' +
+        '<div class="pot">🪙<b>' + fmt(pot) + '</b><span>POT</span></div>' +
+        '<div class="status">' + status + '</div>' +
+      '</div>' +
+      '<div class="tbl-slot">' + playedHTML(1) + (revealResolved && lastWinner === 2 ? '<div class="win-tag">WINNER</div>' : '') + '</div>' +
+    '</div>' +
+    '<div class="tie-note">Tiebreaker: 🔴 Red &gt; 🟡 Yellow &gt; 🔵 Blue &gt; 🟢 Green</div>' +
+    '<div class="actions">' + actions + '</div>';
+  if (pot !== potLast){
+    potLast = pot;
+    const el = t.querySelector('.pot');
+    if (el) el.classList.add('bump');
+  }
+}
+
+function renderResultsHTML(){
+  let banner = '', sub = '', scoreGrid = '';
+  const s = [scoreOf(players[0]), scoreOf(players[1])];
+  const winnerIdx = s[0].total > s[1].total ? 0 : (s[1].total > s[0].total ? 1 : -1);
+
+  if (endKind === 'bankrupt'){
+    banner = '💸 BANKRUPT!';
+    sub = '<p class="small">' + pName(endWinner === 1 ? 1 : 0) +
+      " couldn't pay the $" + ANTE + ' ante.</p>' +
+      '<p class="winner-line">🏆 ' + pName(endWinner - 1) + ' ' + pVerb(endWinner - 1, 'wins') + ' the game!</p>' +
+      '<p class="small">Final cash — ' + pName(0) + ': ' + fmt(players[0].cash) + ' · ' + pName(1) + ': ' + fmt(players[1].cash) + '</p>';
+  } else if (endKind === 'double'){
+    banner = '💸 DOUBLE BANKRUPT!';
+    sub = '<p class="small">Both players are broke — the scores decide!</p>';
+  } else {
+    banner = '🏁 GAME OVER';
+    sub = winnerIdx >= 0
+      ? '<p class="winner-line">🏆 ' + pName(winnerIdx) + ' ' + pVerb(winnerIdx, 'wins') + ' ' + s[winnerIdx].total + ' – ' + s[1 - winnerIdx].total + '!</p>'
+      : '<p class="winner-line">🤝 It\'s a draw — ' + s[0].total + ' – ' + s[1].total + '!</p>';
+  }
+
+  if (endKind !== 'bankrupt'){
+    scoreGrid = '<div class="score-grid">' + players.map((p, pi) => {
+      const sc = scoreOf(p);
+      const isW = winnerIdx === pi;
+      return '<div class="score-card' + (isW ? ' win' : '') + '">' +
+        '<div class="sc-name">' + pName(pi) + (isW ? '<span class="crown">👑</span>' : '') + '</div>' +
+        '<div class="sc-total">' + sc.total + ' <span>pts</span></div>' +
+        '<div class="sc-row"><span>💰 Cash — ' + fmt(p.cash) + ' ÷ 100</span><b>+' + sc.cash + '</b></div>' +
+        '<div class="sc-row"><span>🏛️ Collection — ' + collDesc(p) + '</span><b>+' + sc.coll + '</b></div>' +
+        '<div class="sc-row"><span>🧠 Rational Spender — ' + (p.gachas === 0 ? "never gacha'd" : 'gacha ×' + p.gachas) + '</span><b>+' + sc.rat + '</b></div>' +
+        '<div class="sc-row total"><span>Total</span><b>' + sc.total + '</b></div>' +
+        '</div>';
+    }).join('') + '</div>';
+  }
+
+  return '<div class="result-banner"><h2>' + banner + '</h2>' + sub + '</div>' +
+    scoreGrid +
+    '<div class="actions">' +
+      '<button class="btn gold" data-action="again">🔄 Play Again</button>' +
+      '<button class="btn ghost" data-action="rules">📖 How to Play</button>' +
+    '</div>';
+}
+
+function renderLog(){
+  const el = $('log');
+  if (!el) return;
+  el.innerHTML = battleLog.map((s, i) =>
+    '<div class="log-pill' + (i === battleLog.length - 1 ? ' fresh' : '') + '">' + s + '</div>'
+  ).join('');
+  el.scrollLeft = el.scrollWidth;
+}
+
+function render(){
+  renderHud();
+  renderPlayer(0);
+  renderPlayer(1);
+  renderTable();
+  renderLog();
+}
+
+/* ---------------- Overlays & modals ---------------- */
+function showPass(pi, reason, cb){
+  const el = $('overlay');
+  if (!el) return;
+  el.innerHTML =
+    '<div class="pass-card">' +
+      '<div class="pass-icon">🤝</div>' +
+      '<h2>Pass the device</h2>' +
+      '<p class="pass-to">to <b class="p' + pi + '">Player ' + (pi + 1) + '</b></p>' +
+      '<p class="pass-reason">' + reason + '</p>' +
+      '<button class="btn gold" data-action="pass-go">I\'m Player ' + (pi + 1) + ' — Let\'s go!</button>' +
+    '</div>';
+  el.classList.add('show');
+  passCallback = cb;
+  sfx.draw();
+}
+
+function hidePass(){
+  const el = $('overlay');
+  if (el) el.classList.remove('show');
+  passCallback = null;
+}
+
+function openModal(html){
+  const el = $('modal');
+  if (!el) return;
+  el.innerHTML = '<div class="modal-card">' + html + '</div>';
+  el.classList.add('show');
+}
+
+function closeModal(){
+  const el = $('modal');
+  if (el) el.classList.remove('show');
+}
+
+function openIntro(){
+  openModal(
+    '<div class="intro-logo">🎴 MACAU GACHA</div>' +
+    '<p class="intro-sub">A Macau Cultural Card Duel · Two Players or vs Computer</p>' +
+    '<div class="intro-suits">🔴 Festive Heritage · 🟡 Gastronomy<br>🔵 Landmarks · 🟢 Modern Entertainment</div>' +
+    '<div class="intro-steps">' +
+      '<div><b>1</b> Ante $200 & play a card face-down</div>' +
+      '<div><b>2</b> Higher value takes the $400 pot</div>' +
+      '<div><b>3</b> Free draw — then a $500 Gacha popup</div>' +
+    '</div>' +
+    '<p class="intro-meta">5 rounds · $3,000 each · bankruptcy = instant defeat</p>' +
+    '<button class="btn gold big" data-action="start-2p">👥 Two Players — Hot-Seat</button>' +
+    '<button class="btn gold big" data-action="start-ai">🤖 Single Player — vs Computer</button>' +
+    '<button class="btn ghost" data-action="rules">📖 How to Play</button>'
+  );
+}
+
+function openRules(){
+  openModal(
+    '<h2 class="rules-title">📖 How to Play</h2>' +
+    '<div class="rules-body">' +
+    '<h3>🎯 The Goal</h3>' +
+    '<p>Duel for 5 rounds. After Round 5, the player with the highest total score wins.</p>' +
+    '<h3>🃏 Setup</h3>' +
+    '<ul>' +
+      '<li>2 players, hot-seat style — <b>pass the device</b> between turns so nobody peeks.</li>' +
+      '<li>Each player starts with 3 random cards and $3,000 in chips.</li>' +
+      '<li>Deck: 48 cultural cards — 4 suits with values 1–12 each.</li>' +
+    '</ul>' +
+    '<h3>🎨 The Four Suits</h3>' +
+    '<p>🔴 <b>Red</b> — Festive Heritage &nbsp;·&nbsp; 🟡 <b>Yellow</b> — Gastronomy<br>' +
+    '🔵 <b>Blue</b> — Landmarks &nbsp;·&nbsp; 🟢 <b>Green</b> — Modern Entertainment</p>' +
+    '<h3>🔁 Each Round — 3 Steps</h3>' +
+    '<ol>' +
+      '<li><b>Secret Ante & Play</b> — Both players ante $200 into the pot ($400 total). Each player secretly picks 1 card and plays it face-down; both cards are revealed at the same time.</li>' +
+      '<li><b>Winner Takes All</b> — Higher value wins. On equal values the suit decides: 🔴 Red &gt; 🟡 Yellow &gt; 🔵 Blue &gt; 🟢 Green. The winner collects the entire $400 pot. Played cards go to the discard pile.</li>' +
+      '<li><b>Free Draw & Gacha</b> — Everyone draws 1 free card (hand limit: 3). Then a Gacha popup appears: spend $500 to draw 1 extra card. If your hand is full, you must discard 1 old card to keep the new one. Skipping is free.</li>' +
+    '</ol>' +
+    '<h3>🤖 Single-Player Mode</h3>' +
+    '<p>Choose <b>vs Computer</b> to duel a built-in AI opponent. The computer picks its cards, plays them face-down, and decides on the Gacha all by itself — you control only Player 1.</p>' +
+    '<h3>💸 Bankruptcy</h3>' +
+    "<p>If you can't pay the $200 ante, you are bankrupt — your opponent wins immediately. If you can't afford the $500 gacha, the Gacha button is locked.</p>" +
+    '<h3>🏆 Final Scoring (after Round 5)</h3>' +
+    '<ul>' +
+      '<li><b>Cash:</b> every $100 remaining = 1 point.</li>' +
+      '<li><b>Collection:</b> 2 cards of the same suit in hand = 4 points; 3 of the same suit = 9 points.</li>' +
+      '<li><b>Rational Spender:</b> +5 points if you never pulled a Gacha all game.</li>' +
+    '</ul>' +
+    '<p>Highest total wins. Good luck! 🍀</p>' +
+    '</div>' +
+    '<button class="btn gold" data-action="close-rules">Got it ✕</button>'
+  );
+}
+
+/* ---------------- Confetti ---------------- */
+function confetti(n){
+  const fx = $('fx');
+  if (!fx) return;
+  const colors = ['#d4af37', '#e63946', '#f4a900', '#3a7bd5', '#2a9d3f', '#ffffff'];
+  for (let i = 0; i < n; i++){
+    const d = document.createElement('i');
+    d.className = 'confetti';
+    d.style.left = (Math.random() * 100) + 'vw';
+    d.style.background = colors[i % colors.length];
+    d.style.animationDelay = (Math.random() * 0.6) + 's';
+    d.style.animationDuration = (1.8 + Math.random() * 1.6) + 's';
+    d.style.width = (6 + Math.random() * 6) + 'px';
+    d.style.height = (10 + Math.random() * 8) + 'px';
+    fx.appendChild(d);
+    setTimeout(() => d.remove(), 4000);
+  }
+}
+
+/* ---------------- Event delegation ---------------- */
+document.addEventListener('click', e => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  ensureAudio();
+  const a = btn.dataset.action;
+  switch (a){
+    case 'start':    closeModal(); beginRound(1, true); break;
+    case 'start-2p': startGame(false); break;
+    case 'start-ai': startGame(true); break;
+    case 'rules':    openRules(); break;
+    case 'close-rules':
+      closeModal();
+      if (phase === 'start') openIntro();
+      break;
+    case 'sound':    toggleSound(); break;
+    case 'pick':
+      if (phase === 'p1pick' || phase === 'p2pick'){
+        onPick(phase === 'p1pick' ? 0 : 1, +btn.dataset.id);
+      }
+      break;
+    case 'confirm-play': confirmPlay(phase === 'p1pick' ? 0 : 1); break;
+    case 'pass-go': {
+      const cb = passCallback;
+      hidePass();
+      if (cb) cb();
+      break;
+    }
+    case 'reveal-continue': continueAfterReveal(); break;
+    case 'gacha-yes':    gachaYes(); break;
+    case 'gacha-no':     gachaNo(); break;
+    case 'gacha-pick':   gachaPick(+btn.dataset.id); break;
+    case 'gacha-confirm': gachaConfirm(); break;
+    case 'again':        newGame(false); break;
+  }
+});
+
+/* ---------------- Boot ---------------- */
+const soundBtn = $('soundBtn');
+if (soundBtn) soundBtn.textContent = soundOn ? '🔊' : '🔇';
+newGame(true);
+</script>
+</body>
+</html>
