@@ -674,7 +674,7 @@ function newGame(withIntro){
       "Deck: 48 cultural cards, 4 suits ：Red Festive Heritage, Yellow Gastronomy, Blue Landmarks, Green Modern Entertainment （values 1–12 each）.");
     demoAfter(() => {
       demoNote("<b>SETUP</b> ：Each player is dealt 3 cards; the duel lasts 5 rounds.<br>" +
-        "Every round has 4 steps ：(1) fixed ante → (2) secret play & reveal → (3) free draw → (4) optional Gacha.");
+        "Every round has 4 steps ：(1) fixed bet → (2) secret play & reveal → (3) free draw → (4) optional Gacha.");
       demoAfter(() => beginRound(1));
     });
   }
@@ -707,11 +707,11 @@ function beginRound(n){
   if (broke[0] || broke[1]){
     if (broke[0] && broke[1]){
       endKind = 'double';
-      addLog("💸 BOTH players can't pay the " + fmt(a) + " ante — scores will decide!");
+      addLog("💸 BOTH players can't pay the " + fmt(a) + " bet — scores will decide!");
     } else {
       endKind = 'bankrupt';
       endWinner = broke[0] ? 2 : 1;
-      addLog("💸 " + pName(broke[0] ? 0 : 1) + " can't pay the " + fmt(a) + " ante — BANKRUPT! " + pName(endWinner - 1) + " " + pVerb(endWinner - 1, 'wins') + "!");
+      addLog("💸 " + pName(broke[0] ? 0 : 1) + " can't pay the " + fmt(a) + " bet — BANKRUPT! " + pName(endWinner - 1) + " " + pVerb(endWinner - 1, 'wins') + "!");
     }
     endGame();
     return;
@@ -723,11 +723,11 @@ function beginRound(n){
   phase = 'p1pick';
   players[0].cash -= a; players[1].cash -= a;
   pot = a * 2;
-  addLog("🪙 Round " + n + " — both players ante " + fmt(a) + " each (pot " + fmt(pot) + ").");
+  addLog("🪙 Round " + n + " — both players bet " + fmt(a) + " each (pot " + fmt(pot) + ").");
   render(); sfx.draw();
   if (demoMode){
-    demoNote("<b>(1) FIXED ANTE</b>（Round " + n + "）：both players automatically pay " + fmt(a) + " each → pot " + fmt(pot) + ".<br>" +
-      "No raising, no folding. Can't pay the ante → instant bankruptcy.<br>" +
+    demoNote("<b>(1) FIXED BET</b>（Round " + n + "）：both players automatically pay " + fmt(a) + " each → pot " + fmt(pot) + ".<br>" +
+      "No raising, no folding. Can't pay the bet → instant bankruptcy.<br>" +
       "Rounds 1–2: 100 pts each · Rounds 3–5: 200 pts each.");
     demoAfter(demoPlayCard);
   }
@@ -768,7 +768,7 @@ function resolveReveal(){
   const w = compare(c1, c2);
   if (w === 0){
     players[0].cash += a; players[1].cash += a; pot = 0;
-    revealMsg = "🤝 Exact tie — both antes returned!";
+    revealMsg = "🤝 Exact tie — both bets returned!";
     lastWinner = 0;
     sfx.lose();
   } else {
@@ -934,21 +934,30 @@ function endGame(){
     endWinnerIdx = endWinner - 1;
   } else if (s[0].total !== s[1].total){
     endWinnerIdx = s[0].total > s[1].total ? 0 : 1;
-  } else if (players[0].cash !== players[1].cash){
-    endWinnerIdx = players[0].cash > players[1].cash ? 0 : 1; // tie on score → more points wins
   } else {
-    endWinnerIdx = -1; // full draw
+    endWinnerIdx = -1; // equal scores → 50/50 split
   }
 
-  // 2) Winner takes all: the loser's remaining points are seized.
+  // 2) Proportional settlement: both players pool all remaining points and
+  //    split the pool in proportion to their final scores. Rounding drift goes
+  //    to the higher scorer. (Bankruptcy is a mid-game knock-out: winner takes all.)
   endSeized = 0;
-  if (endWinnerIdx >= 0){
+  const pool = players[0].cash + players[1].cash;
+  if (endKind === 'bankrupt'){
     endSeized = players[1 - endWinnerIdx].cash;
     players[endWinnerIdx].cash += endSeized;
     players[1 - endWinnerIdx].cash = 0;
     addLog("💰 Winner takes all — " + pName(endWinnerIdx) + " seizes " + fmt(endSeized) + " (" + fmt$(endSeized) + ") from " + pName(1 - endWinnerIdx) + "!");
+  } else if (endWinnerIdx >= 0){
+    const loser = 1 - endWinnerIdx;
+    const lower = Math.round(pool * s[loser].total / (s[0].total + s[1].total));
+    players[loser].cash = lower;
+    players[endWinnerIdx].cash = pool - lower;
+    addLog("⚖️ Split by final score — " + pName(0) + " takes " + fmt(players[0].cash) + " (" + fmt$(players[0].cash) + "), " + pName(1) + " takes " + fmt(players[1].cash) + " (" + fmt$(players[1].cash) + ").");
   } else {
-    addLog("🤝 Draw — both keep their own points.");
+    players[0].cash = Math.floor(pool / 2);
+    players[1].cash = pool - players[0].cash;
+    addLog("🤝 Draw — equal scores, pool split 50/50: " + pName(0) + " takes " + fmt(players[0].cash) + ", " + pName(1) + " takes " + fmt(players[1].cash) + ".");
   }
 
   if (endKind === 'bankrupt') sfx.bankrupt(); else sfx.win();
@@ -957,19 +966,19 @@ function endGame(){
   if (demoMode){
     demoNote("<b>FINAL SCORING</b> ：every 100 pts of cash = 1 point.<br>" +
       "2 same-suit cards = 4 · 3 same-suit = 9 · never gacha'd = +5 （Rational Spender）.<br>" +
-      "The score decides the winner ：not who won more pots.");
+      "The score decides the split ：not who won more pots.");
     demoAfter(() => {
       demoNote("<b>RATIONAL SPENDER</b> ：" + pName(0) + " pulled the Gacha " + players[0].gachas + "×, so no bonus. " +
         pName(1) + " never pulled all game → <b>+5</b>.<br>" +
         "Scores ：A: " + s[0].cash + " cash + " + s[0].coll + " suits + " + s[0].rat + " bonus = " + s[0].total +
         " · B: " + s[1].cash + " cash + " + s[1].coll + " suits + " + s[1].rat + " bonus = " + s[1].total + ".<br>" +
-        pName(1) + " wins by never gacha'ing ：discipline beats spending.");
+        pName(1) + " scores higher by never gacha'ing ：discipline beats spending.");
       demoAfter(() => {
-        demoNote("<b>WINNER TAKES ALL</b> ：the higher score seizes every remaining point from the loser.<br>" +
-          "Tie on score → more remaining points wins; still tied → a draw, both keep their points.<br>" +
+        demoNote("<b>PROPORTIONAL SPLIT</b> ：both players pool all remaining points and split them in proportion to their final scores.<br>" +
+          "Equal scores would split the pool 50/50.<br>" +
           (endWinnerIdx >= 0
-            ? "Here, " + pName(endWinnerIdx) + " walks away with everything ：" + pName(1 - endWinnerIdx) + " leaves with 0."
-            : "Here it's a draw ：both keep their points."));
+            ? "Here the pool is " + fmt(pool) + " (" + fmt$(pool) + "), and " + pName(endWinnerIdx) + " takes " + fmt(players[endWinnerIdx].cash) + " while " + pName(1 - endWinnerIdx) + " takes " + fmt(players[1 - endWinnerIdx].cash) + "."
+            : "Here it's a draw ：the pool is split 50/50."));
       });
     });
   }
@@ -1322,7 +1331,7 @@ function renderResultsHTML(){
 
   if (endKind === 'bankrupt'){
     banner = '💸 BANKRUPT!';
-    sub = '<p class="small">' + pName(1 - wIdx) + " couldn't pay the ante.</p>" +
+    sub = '<p class="small">' + pName(1 - wIdx) + " couldn't pay the bet.</p>" +
           '<p class="winner-line">🏆 ' + pName(wIdx) + ' ' + pVerb(wIdx, 'wins') + ' the game!</p>';
   } else if (endKind === 'double'){
     banner = '💸 DOUBLE BANKRUPT!';
@@ -1352,12 +1361,19 @@ function renderResultsHTML(){
       }).join('') + '</div>'
     : '';
 
-  const settle = wIdx >= 0
+  const poolTxt = fmt(endCashBefore[0] + endCashBefore[1]);
+  const poolDollar = fmt$(endCashBefore[0] + endCashBefore[1]);
+  const settle = endKind === 'bankrupt'
     ? '<div class="settle-strip">💰 <b>WINNER TAKES ALL!</b><br>' +
       '<span class="big">' + fmt(endSeized) + ' (' + fmt$(endSeized) + ')</span> seized from ' + pName(1 - wIdx) + ' by ' + pName(wIdx) + '.<br>' +
       '<span class="final">Final — ' + pName(wIdx) + ': ' + fmt(players[wIdx].cash) + ' (' + fmt$(players[wIdx].cash) + ') &nbsp;·&nbsp; ' + pName(1 - wIdx) + ': 0 pts ($0)</span></div>'
-    : '<div class="settle-strip">🤝 <b>DRAW</b> — both keep their own points: ' +
-      pName(0) + ' ' + fmt(players[0].cash) + ' · ' + pName(1) + ' ' + fmt(players[1].cash) + '</div>';
+    : (wIdx >= 0
+      ? '<div class="settle-strip">⚖️ <b>PROPORTIONAL SPLIT</b> — pool ' + poolTxt + ' (' + poolDollar + ') split by final score<br>' +
+        '<span class="big">' + pName(wIdx) + ' takes ' + fmt(players[wIdx].cash) + ' (' + fmt$(players[wIdx].cash) + ')</span> · ' +
+        pName(1 - wIdx) + ' takes ' + fmt(players[1 - wIdx].cash) + ' (' + fmt$(players[1 - wIdx].cash) + ')<br>' +
+        '<span class="final">' + pName(wIdx) + ' scored ' + s[wIdx].total + ' vs ' + s[1 - wIdx].total + ' → share ' + (players[wIdx].cash / (endCashBefore[0] + endCashBefore[1]) * 100).toFixed(1) + '%</span></div>'
+      : '<div class="settle-strip">🤝 <b>DRAW</b> — equal scores, pool split 50/50: ' +
+        pName(0) + ' takes ' + fmt(players[0].cash) + ' · ' + pName(1) + ' takes ' + fmt(players[1].cash) + '</div>');
 
   return '<div class="result-banner"><h2>' + banner + '</h2>' + sub + '</div>' +
     scoreGrid +
@@ -1403,7 +1419,7 @@ function openIntro(){
     '<div class="intro-logo">🎴 MACAU GACHA</div>' +
     '<div class="intro-suits">🔴 Festive Heritage · 🟡 Gastronomy<br>🔵 Landmarks · 🟢 Modern Entertainment</div>' +
     '<div class="intro-steps">' +
-      '<div><b>1</b> Forced ante 100–200 pts & play a card face-down</div>' +
+      '<div><b>1</b> Forced bet 100–200 pts & play a card face-down</div>' +
       '<div><b>2</b> Higher value takes the pot (🔴 &gt; 🟡 &gt; 🔵 &gt; 🟢)</div>' +
       '<div><b>3</b> Free draw — then a 50 pts ($5) Gacha popup</div>' +
     '</div>' +
@@ -1420,7 +1436,7 @@ function openRules(){
     '<div class="rules-body">' +
     '<p>⚠️ <b>Educational simulation</b> — the money in this game is fictional: a $80 buy-in becomes 800 pts (1 pt = $0.10). No real transactions, no withdrawals, no mid-game recharge.</p>' +
     '<h3>🎯 The Goal</h3>' +
-    '<p>Duel for 5 rounds. After Round 5, the higher total score wins — and seizes all of the loser\'s remaining points.</p>' +
+    '<p>Duel for 5 rounds. After Round 5, both players pool all remaining points and split them in proportion to their final scores.</p>' +
     '<h3>🃏 Setup</h3>' +
     '<ul>' +
       '<li>Two players duel every game: <b>you vs the computer</b>, or the self-running <b>🎬 Demo Mode</b>.</li>' +
@@ -1432,7 +1448,7 @@ function openRules(){
     '🔵 <b>Blue</b> — Landmarks &nbsp;·&nbsp; 🟢 <b>Green</b> — Modern Entertainment</p>' +
     '<h3>🔁 Each Round — 4 Steps</h3>' +
     '<ol>' +
-      '<li><b>Forced Ante</b> — Rounds 1–2: 100 pts ($10) each → pot 200 pts. Rounds 3–5: 200 pts ($20) each → pot 400 pts. Nobody can raise or fold — the ante is automatic.</li>' +
+      '<li><b>Forced Bet</b> — Rounds 1–2: 100 pts ($10) each → pot 200 pts. Rounds 3–5: 200 pts ($20) each → pot 400 pts. Nobody can raise or fold — the bet is automatic.</li>' +
       '<li><b>Secret Play</b> — Each player secretly picks 1 card and plays it face-down; both cards are revealed at the same time.</li>' +
       '<li><b>Winner Takes the Pot</b> — Higher value wins. Equal values: 🔴 Red &gt; 🟡 Yellow &gt; 🔵 Blue &gt; 🟢 Green. The winner collects the whole pot; played cards go to the discard pile.</li>' +
       '<li><b>Free Draw & Gacha</b> — Everyone draws 1 free card (hand limit: 3). Then the Gacha popup: spend <b>50 pts ($5)</b> for 1 extra card (discard 1 old card if your hand is full). Skipping is free.</li>' +
@@ -1441,15 +1457,15 @@ function openRules(){
     '<p><b>vs Computer</b> — duel a built-in AI opponent: it picks its cards, plays them face-down, and decides on the Gacha all by itself — you control only Player 1.</p>' +
     '<p><b>🎬 Demo Mode</b> — a scripted exhibition game (Player A vs Player B) that advances <b>only when you click "Next ➜"</b> — each step shows a commentary line explaining the rule being played. Ideal for presentations.</p>' +
     '<h3>💸 Bankruptcy</h3>' +
-    "<p>If you can't pay a round's ante, you are bankrupt — your opponent wins immediately. With an 800-pt bankroll the antes alone can't break you: bankruptcy only happens if you overspend on the Gacha. The Gacha button locks when you can't afford it.</p>" +
+    "<p>If you can't pay a round's bet, you are bankrupt — your opponent wins immediately. With an 800-pt bankroll the bets alone can't break you: bankruptcy only happens if you overspend on the Gacha. The Gacha button locks when you can't afford it.</p>" +
     '<h3>🏆 Final Scoring (after Round 5)</h3>' +
     '<ul>' +
       '<li><b>Cash:</b> every 100 pts remaining = 1 point.</li>' +
       '<li><b>Collection:</b> 2 cards of the same suit in hand = 4 points; 3 of the same suit = 9 points.</li>' +
       '<li><b>Rational Spender:</b> +5 points if you never pulled a Gacha all game.</li>' +
     '</ul>' +
-    '<h3>💰 Winner Takes All</h3>' +
-    "<p>After scoring, the loser's remaining points are all seized by the winner — you walk away with everything or nothing. Tie on score → the player with more remaining points wins. Still tied → a draw, both keep their points.</p>" +
+    '<h3>⚖️ Proportional Settlement</h3>' +
+    "<p>After scoring, both players pool all their remaining points and split the pool in proportion to their final scores. Equal scores split the pool 50/50. Bankruptcy is different: the game ends early and the winner takes everything.</p>" +
     '<p>Good luck! 🍀</p>' +
     '</div>' +
     '<button class="btn gold" data-action="close-rules">Got it ✕</button>'
