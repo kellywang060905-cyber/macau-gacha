@@ -6,7 +6,7 @@ A single-file card game inspired by world culture — play solo against a built-
 
 - **Two ways to play**:
   - **vs Computer** — Player 2 is a built-in AI that picks its cards and decides on the Gacha by itself; its hand always stays face-down.
-  - **🎬 Demo Mode** — a fully scripted exhibition match (Player A vs Player B) that advances **only when you click "Next ➜"**: each step shows a commentary line explaining the rule being played. It walks through the setup (buy-in, deck, 3-card hands, 5 rounds), then each round's 4 numbered steps — (1) fixed bet → (2) secret play & reveal (incl. the suit tiebreak) → (3) free draw → (4) optional Gacha — then final scoring and the proportional settlement, ending with the responsible-gaming lesson that discipline (never gacha'ing) beats spending.
+  - **🎬 Demo Mode** — a fully scripted exhibition match (Player A vs Player B) that advances **only when you click "Next ➜"**, one step at a time. It walks through the setup (buy-in, deck, 3-card hands, 5 rounds), then each round's 4 numbered steps — (1) fixed bet → (2) secret play & reveal (incl. the suit tiebreak) → (3) free draw → (4) optional Gacha — then final scoring and the proportional settlement, ending with the responsible-gaming lesson that discipline (never gacha'ing) beats spending.
 - **Buy-in (simulated)**: each player "inserts" **$80 → 800 pts** (1 pt = $0.10). No real money, no withdrawals, no mid-game recharge — it's a classroom simulation of a real-money-style bankroll.
 - Each player duels for **5 rounds**, starting with **3 cards**.
 - **Deck**: 48 world-famous cards in 4 suits (values 1–12): 🔴 Festivals · 🟡 Gastronomy · 🔵 Landmarks · 🟢 Entertainment.
@@ -19,7 +19,7 @@ A single-file card game inspired by world culture — play solo against a built-
 - **Final scoring** (after Round 5): every 100 pts cash = 1 point · 2 same-suit cards = 4 pts · 3 same-suit = 9 pts · never gacha'd all game = **+5 "Rational Spender"** bonus.
 - **⚖️ Proportional settlement**: after scoring, both players pool all their remaining points and split the pool in proportion to their final scores. Equal scores split the pool 50/50. Bankruptcy is different: the game ends early and the winner takes everything.
 
-In Demo Mode the game never advances on its own: each step ends with a commentary line, and the match only moves on when you click **Next ➜** — like slides, so you can talk through every rule at your own pace during the presentation. Click the **▾** button in the bubble's corner to collapse it out of the way (so the class can watch the cards reveal); click **▸** to expand it again.
+In Demo Mode the game never advances on its own: the match only moves on when you click **Next ➜**, one step at a time — like slides, so you can talk through every rule at your own pace during the presentation. The button sits in its own strip above the table, out of the way of the cards.
 
 ## ▶️ Play locally
 

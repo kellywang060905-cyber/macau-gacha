@@ -245,40 +245,13 @@ button.card:hover:not(:disabled){transform:translateY(-5px); box-shadow:0 10px 1
 #demoBar{
   display:none;
   position:fixed; left:50%; top:96px; transform:translateX(-50%);
-  z-index:40; width:min(1600px, calc(100vw - 48px));
-  box-sizing:border-box; max-height:210px; overflow-y:auto;
-  background:rgba(8,10,18,.95); border:2px solid #d4af37;
-  box-shadow:0 10px 34px rgba(0,0,0,.75), 0 0 18px rgba(212,175,55,.25);
-  padding:16px 24px 20px;
+  z-index:40;
 }
-/* Demo Mode: reserve a full-width strip under the header so the bar
+/* Demo Mode: reserve a slim strip under the header so the Next button
    never covers the table. The table position stays constant all game. */
-body.demo-on main{padding-top:222px}
+body.demo-on main{padding-top:84px}
 #demoBar.show{display:block}
-#demoBar .demo-head{display:flex; gap:14px; align-items:flex-start}
-#demoBar #demoText{min-width:0}
-.demo-toggle{
-  flex-shrink:0; width:36px; height:36px; line-height:1;
-  background:rgba(255,255,255,.08); border:1px solid rgba(212,175,55,.5);
-  border-radius:0; color:var(--gold2); font-size:16px; font-weight:900; cursor:pointer;
-}
-.demo-toggle:hover{background:rgba(212,175,55,.28)}
-#demoBar.collapsed{display:flex; align-items:center; gap:14px; width:auto; padding:10px 16px}
-#demoBar.collapsed .demo-head{display:contents}
-#demoBar.collapsed #demoText{display:none}
-#demoBar.collapsed .demo-foot{margin-top:0}
-#demoBar.collapsed .demo-arrow{display:none}
-.demo-foot{display:flex; align-items:center; justify-content:flex-end; margin-top:12px}
-#demoBar #demoText{font-size:24px; line-height:1.5; font-weight:700}
-#demoBar #demoText.flash{animation:bump .5s ease}
-#demoBar #demoNextBtn{flex-shrink:0; padding:12px 26px; font-size:18px}
-#demoBar #demoNextBtn:not(:disabled){animation:pulse 1.2s ease infinite}
-#demoBar .demo-arrow{
-  position:absolute; left:50%; top:100%;
-  width:0; height:0;
-  border-left:18px solid transparent; border-right:18px solid transparent;
-  border-top:18px solid #d4af37;
-}
+#demoBar #demoNextBtn{padding:14px 40px; font-size:24px}
 @keyframes pulse{
   0%,100%{box-shadow:0 0 0 0 rgba(212,175,55,0)}
   50%{box-shadow:0 0 14px 4px rgba(212,175,55,.55)}
@@ -414,14 +387,7 @@ body.demo-on main{padding-top:222px}
 </main>
 
 <div id="demoBar">
-  <div class="demo-head">
-    <button class="demo-toggle" data-action="demo-toggle" title="Collapse / expand notes">▾</button>
-    <div id="demoText"></div>
-  </div>
-  <div class="demo-foot">
-    <button class="btn gold" id="demoNextBtn" data-action="demo-next" disabled>Next ➜</button>
-  </div>
-  <div class="demo-arrow"></div>
+  <button class="btn gold" id="demoNextBtn" data-action="demo-next" disabled>Next ➜</button>
 </div>
 <div id="modal"></div>
 
@@ -712,11 +678,11 @@ function beginRound(n){
   if (broke[0] || broke[1]){
     if (broke[0] && broke[1]){
       endKind = 'double';
-      addLog("💸 BOTH players can't pay the " + fmt(a) + " bet — scores will decide!");
+      addLog("💸 BOTH players can't pay the " + fmt(a) + " bet — scores will decide.");
     } else {
       endKind = 'bankrupt';
       endWinner = broke[0] ? 2 : 1;
-      addLog("💸 " + pName(broke[0] ? 0 : 1) + " can't pay the " + fmt(a) + " bet — BANKRUPT! " + pName(endWinner - 1) + " " + pVerb(endWinner - 1, 'wins') + "!");
+      addLog("💸 " + pName(broke[0] ? 0 : 1) + " can't pay the " + fmt(a) + " bet — BANKRUPT. " + pName(endWinner - 1) + " " + pVerb(endWinner - 1, 'wins') + ".");
     }
     endGame();
     return;
@@ -773,7 +739,7 @@ function resolveReveal(){
   const w = compare(c1, c2);
   if (w === 0){
     players[0].cash += a; players[1].cash += a; pot = 0;
-    revealMsg = "🤝 Exact tie — both bets returned!";
+    revealMsg = "🤝 Exact tie — both bets returned.";
     lastWinner = 0;
     sfx.lose();
   } else {
@@ -781,13 +747,13 @@ function resolveReveal(){
     lastWinner = w;
     const wc = w === 1 ? c1 : c2, lc = w === 1 ? c2 : c1;
     if (c1.value === c2.value){
-      revealMsg = "⚔️ Tie on " + c1.value + "! Suit rank decides: " +
+      revealMsg = "⚔️ Tie on " + c1.value + ". Suit rank decides: " +
         COLOR_META[wc.color].chip + " " + COLOR_META[wc.color].label + " beats " +
         COLOR_META[lc.color].chip + " " + COLOR_META[lc.color].label +
-        " — " + pName(w - 1) + " " + pVerb(w - 1, 'takes') + " the " + fmt(a * 2) + " pot!";
+        " — " + pName(w - 1) + " " + pVerb(w - 1, 'takes') + " the " + fmt(a * 2) + " pot.";
     } else {
       revealMsg = "⚔️ " + c1.name + " (" + c1.value + ") vs " + c2.name + " (" + c2.value +
-        ") — " + pName(w - 1) + " " + pVerb(w - 1, 'takes') + " the " + fmt(a * 2) + " pot!";
+        ") — " + pName(w - 1) + " " + pVerb(w - 1, 'takes') + " the " + fmt(a * 2) + " pot.";
     }
     sfx.win(); confetti(40);
   }
@@ -798,7 +764,7 @@ function resolveReveal(){
   if (demoMode){
     const s = DEMO_SCRIPT[round - 1];
     demoNote(s && s.p0[1] === s.p1[1]
-      ? "<b>(2) REVEAL</b> ：same value! Suit rank decides the tie ：Red &gt; Yellow &gt; Blue &gt; Green."
+      ? "<b>(2) REVEAL</b> ：same value. Suit rank decides the tie ：Red &gt; Yellow &gt; Blue &gt; Green."
       : "<b>(2) REVEAL</b> ：the higher value wins; ties go to suit rank （Red &gt; Yellow &gt; Blue &gt; Green）.<br>" +
         "The winner takes the whole pot; played cards are discarded.");
     demoAfter(() => { if (phase === 'reveal') continueAfterReveal(); });
@@ -833,16 +799,16 @@ function openGachaModal(pi){
   const p = players[pi];
   const canPay = p.cash >= GACHA_COST && deck.length > 0;
   const why = deck.length === 0
-    ? "The deck is empty!"
+    ? "The deck is empty."
     : "You need " + fmt(GACHA_COST) + " to pull — you only have " + fmt(p.cash) + ".";
   openModal(
-    '<div class="gacha-head">🎰 GACHA TIME!</div>' +
+    '<div class="gacha-head">GACHA TIME</div>' +
     '<p class="sub">' + pName(pi) + ' — the gacha machine awaits…</p>' +
     '<div class="gacha-cash">Your cash: 💰 <b>' + fmt(p.cash) + '</b> (' + fmt$(p.cash) + ')</div>' +
     '<p class="gacha-note">Spend <b>' + fmt(GACHA_COST) + ' (' + fmt$(GACHA_COST) + ')</b> to draw 1 extra card from the deck.<br>' +
     'If your hand is full, you must discard 1 old card. Skipping is free.</p>' +
     '<div class="gacha-btns">' +
-      '<button class="btn gold" data-action="gacha-yes"' + (canPay ? '' : ' disabled') + '>🎰 Gacha — ' + fmt(GACHA_COST) + '</button>' +
+      '<button class="btn gold" data-action="gacha-yes"' + (canPay ? '' : ' disabled') + '>Gacha — ' + fmt(GACHA_COST) + '</button>' +
       '<button class="btn ghost" data-action="gacha-no">Skip</button>' +
     '</div>' +
     (canPay ? '' : '<p class="gacha-warn">⚠️ ' + why + '</p>')
@@ -855,7 +821,7 @@ function gachaYes(){
   if (p.cash < GACHA_COST || !deck.length) return;
   p.cash -= GACHA_COST; p.gachas++;
   gachaNewCard = deck.pop();
-  addLog("🎰 " + pName(pi) + " pulled a gacha for " + fmt(GACHA_COST) + "!");
+  addLog("🎰 " + pName(pi) + " pulled a gacha for " + fmt(GACHA_COST) + ".");
   sfx.gacha(); render();
   renderGachaResult();
 }
@@ -863,7 +829,7 @@ function gachaYes(){
 function renderGachaResult(){
   const pi = gachaPlayer, p = players[pi];
   let h =
-    '<div class="gacha-head">✨ New Card!</div>' +
+    '<div class="gacha-head">✨ New Card</div>' +
     '<p class="sub">' + pName(pi) + ' pulled:</p>' +
     '<div class="gacha-new">' + cardHTML(gachaNewCard, 'big') + '</div>';
   if (p.hand.length >= HAND_LIMIT){
@@ -952,7 +918,7 @@ function endGame(){
     endSeized = players[1 - endWinnerIdx].cash;
     players[endWinnerIdx].cash += endSeized;
     players[1 - endWinnerIdx].cash = 0;
-    addLog("💰 Winner takes all — " + pName(endWinnerIdx) + " seizes " + fmt(endSeized) + " (" + fmt$(endSeized) + ") from " + pName(1 - endWinnerIdx) + "!");
+    addLog("💰 Winner takes all — " + pName(endWinnerIdx) + " seizes " + fmt(endSeized) + " (" + fmt$(endSeized) + ") from " + pName(1 - endWinnerIdx) + ".");
   } else if (endWinnerIdx >= 0){
     const loser = 1 - endWinnerIdx;
     const lower = Math.round(pool * s[loser].total / (s[0].total + s[1].total));
@@ -1007,7 +973,7 @@ function aiPlayCard(){
   addLog("🂠 " + pName(1) + " " + pVerb(1, 'plays') + " a card face-down.");
   sfx.flip();
   phase = 'reveal'; render();
-  if (demoMode) demoNote(pName(1) + " also played face-down ：now the simultaneous showdown!");
+  if (demoMode) demoNote(pName(1) + " also played face-down ：now the simultaneous showdown.");
   setTimeout(flipReveal, 600);
 }
 
@@ -1031,7 +997,7 @@ function aiGachaDecision(){
       if (i >= 0){ p.hand.splice(i, 1)[0]; discard.push(gone); discNote = ' It discarded ' + gone.name + ' to make room.'; }
     }
     p.hand.push(nc);
-    addLog("🤖 " + pName(1) + " pulled a gacha for " + fmt(GACHA_COST) + "! New card: " + nc.name + " (" + nc.value + ")." + discNote);
+    addLog("🤖 " + pName(1) + " pulled a gacha for " + fmt(GACHA_COST) + ". New card: " + nc.name + " (" + nc.value + ")." + discNote);
     sfx.gacha();
   } else {
     addLog("🤖 " + pName(1) + (canPay ? " skipped the gacha." : " can't afford the gacha."));
@@ -1187,7 +1153,7 @@ function demoGacha(pi){
       discNote = ' It discarded ' + gone.name + ' to make room.';
     }
     p.hand.push(nc);
-    addLog("🎰 " + pName(pi) + " pulled a gacha for " + fmt(GACHA_COST) + "! New card: " + nc.name + " (" + nc.value + ")." + discNote);
+    addLog("🎰 " + pName(pi) + " pulled a gacha for " + fmt(GACHA_COST) + ". New card: " + nc.name + " (" + nc.value + ")." + discNote);
     sfx.gacha();
     demoNote("<b>GACHA</b> ：" + pName(pi) + " spent " + fmt(GACHA_COST) + " ($5) for an extra card" +
       (discNote ? " and had to discard an old one （hand limit 3）" : "") + ".<br>" +
@@ -1259,13 +1225,13 @@ function renderPlayer(pi){
       : p.hand.map(c => cardHTML(c)).join('');
   panel.className = 'player-panel' + (isTurn ? ' active' : '');
   panel.innerHTML =
-    (isTurn ? '<div class="turn-tag">' + (demoMode ? '🎬 AUTO' : isAI ? '🤖 THINKING…' : '▶ YOUR TURN') + '</div>' : '') +
+    (isTurn ? '<div class="turn-tag">' + (demoMode ? 'AUTO' : isAI ? '🤖 THINKING…' : '▶ YOUR TURN') + '</div>' : '') +
     '<div class="p-head">' +
       '<div class="avatar p' + pi + '">' + (demoMode ? (pi === 0 ? 'A' : 'B') : isAI ? '🤖' : 'P' + (pi + 1)) + '</div>' +
       '<div class="p-info">' +
         '<div class="p-name">' + pName(pi) + '</div>' +
         '<div class="p-cash">💰 <b>' + fmt(p.cash) + '</b> <span>(' + fmt$(p.cash) + ')</span></div>' +
-        (p.gachas > 0 ? '<span class="badge">🎰 Gacha ×' + p.gachas + '</span>' : '') +
+        (p.gachas > 0 ? '<span class="badge">Gacha ×' + p.gachas + '</span>' : '') +
       '</div>' +
     '</div>' +
     '<div class="hand">' + handHTML + '</div>' +
@@ -1299,15 +1265,15 @@ function renderTable(){
       actions = '';
       break;
     case 'reveal':
-      status = revealResolved ? revealMsg : 'Showdown!';
+      status = revealResolved ? revealMsg : 'Showdown';
       actions = revealResolved ? '<button class="btn gold" data-action="reveal-continue">Continue ➜</button>' : '';
       break;
     case 'draw':
-      status = '📥 Free cards drawn — Gacha incoming!';
+      status = '📥 Free cards drawn — Gacha incoming';
       actions = '';
       break;
     case 'p1gacha': case 'p2gacha':
-      status = demoMode ? '🎰 Gacha Time — ' + pName(phase === 'p2gacha' ? 1 : 0) : (aiMode && phase === 'p2gacha') ? '🤖 Computer is deciding on the Gacha…' : '🎰 Gacha Time!';
+      status = demoMode ? 'Gacha Time — ' + pName(phase === 'p2gacha' ? 1 : 0) : (aiMode && phase === 'p2gacha') ? '🤖 Computer is deciding on the Gacha…' : 'Gacha Time';
       actions = '';
       break;
   }
@@ -1335,15 +1301,15 @@ function renderResultsHTML(){
   let banner = '', sub = '';
 
   if (endKind === 'bankrupt'){
-    banner = '💸 BANKRUPT!';
+    banner = '💸 BANKRUPT';
     sub = '<p class="small">' + pName(1 - wIdx) + " couldn't pay the bet.</p>" +
-          '<p class="winner-line">🏆 ' + pName(wIdx) + ' ' + pVerb(wIdx, 'wins') + ' the game!</p>';
+          '<p class="winner-line">🏆 ' + pName(wIdx) + ' ' + pVerb(wIdx, 'wins') + ' the game.</p>';
   } else if (endKind === 'double'){
-    banner = '💸 DOUBLE BANKRUPT!';
-    sub = '<p class="small">Both players are broke — the scores decide!</p>' +
+    banner = '💸 DOUBLE BANKRUPT';
+    sub = '<p class="small">Both players are broke — the scores decide.</p>' +
           (wIdx >= 0
             ? '<p class="winner-line">🏆 ' + pName(wIdx) + ' ' + pVerb(wIdx, 'wins') + '!</p>'
-            : '<p class="winner-line">🤝 It\'s a draw!</p>');
+            : '<p class="winner-line">🤝 It\'s a draw</p>');
   } else {
     banner = '🏁 GAME OVER';
     sub = wIdx >= 0
@@ -1369,7 +1335,7 @@ function renderResultsHTML(){
   const poolTxt = fmt(endCashBefore[0] + endCashBefore[1]);
   const poolDollar = fmt$(endCashBefore[0] + endCashBefore[1]);
   const settle = endKind === 'bankrupt'
-    ? '<div class="settle-strip">💰 <b>WINNER TAKES ALL!</b><br>' +
+    ? '<div class="settle-strip">💰 <b>WINNER TAKES ALL</b><br>' +
       '<span class="big">' + fmt(endSeized) + ' (' + fmt$(endSeized) + ')</span> seized from ' + pName(1 - wIdx) + ' by ' + pName(wIdx) + '.<br>' +
       '<span class="final">Final — ' + pName(wIdx) + ': ' + fmt(players[wIdx].cash) + ' (' + fmt$(players[wIdx].cash) + ') &nbsp;·&nbsp; ' + pName(1 - wIdx) + ': 0 pts ($0)</span></div>'
     : (wIdx >= 0
@@ -1471,7 +1437,7 @@ function openRules(){
     '</ul>' +
     '<h3>⚖️ Proportional Settlement</h3>' +
     "<p>After scoring, both players pool all their remaining points and split the pool in proportion to their final scores. Equal scores split the pool 50/50. Bankruptcy is different: the game ends early and the winner takes everything.</p>" +
-    '<p>Good luck! 🍀</p>' +
+    '<p>Good luck 🍀</p>' +
     '</div>' +
     '<button class="btn gold" data-action="close-rules">Got it ✕</button>'
   );
@@ -1519,14 +1485,7 @@ document.addEventListener('click', e => {
       fn();
       break;
     }
-    case 'demo-toggle': {
-      const bar = $('demoBar');
-      if (!bar) break;
-      const collapsed = bar.classList.toggle('collapsed');
-      const tb = bar.querySelector('.demo-toggle');
-      if (tb) tb.textContent = collapsed ? '▸' : '▾';
-      break;
-    }
+    case 'demo-toggle': break;
     case 'pick':
       if (phase === 'p1pick' || phase === 'p2pick'){
         onPick(phase === 'p1pick' ? 0 : 1, +btn.dataset.id);
