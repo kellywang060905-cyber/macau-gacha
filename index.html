@@ -245,7 +245,7 @@ button.card:hover:not(:disabled){transform:translateY(-5px); box-shadow:0 10px 1
 #demoBar{
   display:none;
   position:fixed; left:50%; top:96px; transform:translateX(-50%);
-  z-index:40;
+  z-index:70; /* above the modal overlay (60) so Next stays clickable during popups */
 }
 /* Demo Mode: reserve a slim strip under the header so the Next button
    never covers the table. The table position stays constant all game. */
@@ -781,12 +781,10 @@ function continueAfterReveal(){
   render(); sfx.draw();
   phase = 'p1gacha'; render();
   if (demoMode){
-    demoNote("<b>(3) FREE DRAW</b> ：each player drew 1 free card （hand limit 3）.");
     demoAfter(() => {
       if (phase !== 'p1gacha') return;
-      demoNote("<b>(4) GACHA</b>（optional）：" + fmt(GACHA_COST) + " ($5) for 1 extra card, once per round.<br>" +
-        "A full hand (limit 3) must discard an old card first. " + pName(0) + " goes first…");
-      demoAfter(() => { if (phase === 'p1gacha') demoGacha(0); });
+      openGachaModal(0);
+      demoAfter(() => { if (phase !== 'p1gacha') return; closeModal(); demoGacha(0); });
     });
   } else {
     openGachaModal(0);
@@ -801,17 +799,24 @@ function openGachaModal(pi){
   const why = deck.length === 0
     ? "The deck is empty."
     : "You need " + fmt(GACHA_COST) + " to pull — you only have " + fmt(p.cash) + ".";
+  const btns = demoMode
+    ? '<div class="gacha-btns">' +
+        '<button class="btn gold" disabled>Gacha — ' + fmt(GACHA_COST) + '</button>' +
+        '<button class="btn ghost" disabled>Skip</button>' +
+      '</div>' +
+      '<p class="gacha-note">Demo Mode — the scripted choice is played when you click Next ➜.</p>'
+    : '<div class="gacha-btns">' +
+        '<button class="btn gold" data-action="gacha-yes"' + (canPay ? '' : ' disabled') + '>Gacha — ' + fmt(GACHA_COST) + '</button>' +
+        '<button class="btn ghost" data-action="gacha-no">Skip</button>' +
+      '</div>' +
+      (canPay ? '' : '<p class="gacha-warn">⚠️ ' + why + '</p>');
   openModal(
     '<div class="gacha-head">GACHA TIME</div>' +
     '<p class="sub">' + pName(pi) + ' — the gacha machine awaits…</p>' +
     '<div class="gacha-cash">Your cash: 💰 <b>' + fmt(p.cash) + '</b> (' + fmt$(p.cash) + ')</div>' +
     '<p class="gacha-note">Spend <b>' + fmt(GACHA_COST) + ' (' + fmt$(GACHA_COST) + ')</b> to draw 1 extra card from the deck.<br>' +
     'If your hand is full, you must discard 1 old card. Skipping is free.</p>' +
-    '<div class="gacha-btns">' +
-      '<button class="btn gold" data-action="gacha-yes"' + (canPay ? '' : ' disabled') + '>Gacha — ' + fmt(GACHA_COST) + '</button>' +
-      '<button class="btn ghost" data-action="gacha-no">Skip</button>' +
-    '</div>' +
-    (canPay ? '' : '<p class="gacha-warn">⚠️ ' + why + '</p>')
+    btns
   );
   sfx.draw();
 }
@@ -979,8 +984,10 @@ function aiPlayCard(){
 
 function aiScheduleGacha(){
   clearTimeout(aiTimer);
-  if (demoMode){ demoAfter(aiGachaDecision); }
-  else { aiTimer = setTimeout(aiGachaDecision, 900); }
+  if (demoMode){
+    openGachaModal(1);
+    demoAfter(() => { if (phase !== 'p2gacha') return; closeModal(); aiGachaDecision(); });
+  } else { aiTimer = setTimeout(aiGachaDecision, 900); }
 }
 
 function aiGachaDecision(){

@@ -6,7 +6,7 @@ A single-file card game inspired by world culture — play solo against a built-
 
 - **Two ways to play**:
   - **vs Computer** — Player 2 is a built-in AI that picks its cards and decides on the Gacha by itself; its hand always stays face-down.
-  - **🎬 Demo Mode** — a fully scripted exhibition match (Player A vs Player B) that advances **only when you click "Next ➜"**, one step at a time. It walks through the setup (buy-in, deck, 3-card hands, 5 rounds), then each round's 4 numbered steps — (1) fixed bet → (2) secret play & reveal (incl. the suit tiebreak) → (3) free draw → (4) optional Gacha — then final scoring and the proportional settlement, ending with the responsible-gaming lesson that discipline (never gacha'ing) beats spending.
+  - **🎬 Demo Mode** — a fully scripted exhibition match (Player A vs Player B) that advances **only when you click "Next ➜"**, one step at a time. It walks through the setup (buy-in, deck, 3-card hands, 5 rounds), then each round's 4 numbered steps — (1) fixed bet → (2) secret play & reveal (incl. the suit tiebreak) → (3) free draw → (4) the GACHA TIME popup for each player (Next ➜ plays the scripted choice) — then final scoring and the proportional settlement, ending with the responsible-gaming lesson that discipline (never gacha'ing) beats spending.
 - **Buy-in (simulated)**: each player "inserts" **$80 → 800 pts** (1 pt = $0.10). No real money, no withdrawals, no mid-game recharge — it's a classroom simulation of a real-money-style bankroll.
 - Each player duels for **5 rounds**, starting with **3 cards**.
 - **Deck**: 48 world-famous cards in 4 suits (values 1–12): 🔴 Festivals · 🟡 Gastronomy · 🔵 Landmarks · 🟢 Entertainment.
