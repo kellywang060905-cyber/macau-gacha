@@ -244,12 +244,16 @@ button.card:hover:not(:disabled){transform:translateY(-5px); box-shadow:0 10px 1
 /* ---------- Demo bar ---------- */
 #demoBar{
   display:none;
-  position:fixed; left:50%; top:128px; transform:translateX(-50%);
-  z-index:40; width:min(880px, calc(100vw - 32px));
+  position:fixed; left:50%; top:96px; transform:translateX(-50%);
+  z-index:40; width:min(1600px, calc(100vw - 48px));
+  box-sizing:border-box; max-height:210px; overflow-y:auto;
   background:rgba(8,10,18,.95); border:2px solid #d4af37;
   box-shadow:0 10px 34px rgba(0,0,0,.75), 0 0 18px rgba(212,175,55,.25);
   padding:16px 24px 20px;
 }
+/* Demo Mode: reserve a full-width strip under the header so the bar
+   never covers the table. The table position stays constant all game. */
+body.demo-on main{padding-top:222px}
 #demoBar.show{display:block}
 #demoBar .demo-head{display:flex; gap:14px; align-items:flex-start}
 #demoBar #demoText{min-width:0}
@@ -685,6 +689,7 @@ function startGame(mode){
   // Every mode is single-device: Player 2 is either the computer or the demo script.
   aiMode = true;
   demoMode = (mode === 'demo');
+  document.body.classList.toggle('demo-on', demoMode);
   syncDemoBar();
   openBuyIn();
 }
