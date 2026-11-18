@@ -1,6 +1,6 @@
-# 🎴 Macau Gacha — Card Showdown
+# 🎴 World Gacha — Card Showdown
 
-A single-file card game inspired by Macau's culture — play solo against a built-in computer opponent, or run the **🎬 Demo Mode** that presents the full rules step by step, advancing only when you click **Next ➜** (great for presentations). No build tools, no dependencies — just open it in a browser.
+A single-file card game inspired by world culture — play solo against a built-in computer opponent, or run the **🎬 Demo Mode** that presents the full rules step by step, advancing only when you click **Next ➜** (great for presentations). No build tools, no dependencies — just open it in a browser.
 
 ## 🎮 Game Overview
 
@@ -9,7 +9,7 @@ A single-file card game inspired by Macau's culture — play solo against a buil
   - **🎬 Demo Mode** — a fully scripted exhibition match (Player A vs Player B) that advances **only when you click "Next ➜"**: each step shows a commentary line explaining the rule being played. It walks through the setup (buy-in, deck, 3-card hands, 5 rounds), then each round's 4 numbered steps — (1) fixed bet → (2) secret play & reveal (incl. the suit tiebreak) → (3) free draw → (4) optional Gacha — then final scoring and the proportional settlement, ending with the responsible-gaming lesson that discipline (never gacha'ing) beats spending.
 - **Buy-in (simulated)**: each player "inserts" **$80 → 800 pts** (1 pt = $0.10). No real money, no withdrawals, no mid-game recharge — it's a classroom simulation of a real-money-style bankroll.
 - Each player duels for **5 rounds**, starting with **3 cards**.
-- **Deck**: 48 cultural cards in 4 suits (values 1–12): 🔴 Festive Heritage · 🟡 Gastronomy · 🔵 Landmarks · 🟢 Modern Entertainment.
+- **Deck**: 48 world-famous cards in 4 suits (values 1–12): 🔴 Festivals · 🟡 Gastronomy · 🔵 Landmarks · 🟢 Entertainment.
 - **Each round (Fixed Limit)**:
   1. **Forced bet** — Rounds 1–2: 100 pts each (pot 200). Rounds 3–5: 200 pts each (pot 400). No raising, no folding.
   2. **Secret play** — both players pick a card face-down and reveal simultaneously.

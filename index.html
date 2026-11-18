@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
-<title>Macau Gacha — Card Showdown</title>
+<title>World Gacha — Card Showdown</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
@@ -394,7 +394,7 @@ button.card:hover:not(:disabled){transform:translateY(-5px); box-shadow:0 10px 1
 
 <header>
   <div class="brand">
-    <h1>MACAU GACHA</h1>
+    <h1>WORLD GACHA</h1>
   </div>
   <div class="hud">
     <div class="pill" id="roundPill">Round 1 / 5</div>
@@ -424,7 +424,7 @@ button.card:hover:not(:disabled){transform:translateY(-5px); box-shadow:0 10px 1
 <script>
 'use strict';
 /* ================================================================
-   MACAU GACHA — A Macau cultural card duel
+   WORLD GACHA — A world culture card duel
    with a simulated gacha economy. Educational only.
    ================================================================ */
 
@@ -445,41 +445,41 @@ function sumAntes(from, to){
 
 const CARD_DATA = {
   red: [
-    ["Red Envelope","🧧"], ["Firecracker","🧨"], ["Paper Lantern","🏮"],
-    ["Tangerine Tree","🍊"], ["Lion Dance","🦁"], ["Dragon Boat Race","🛶"],
-    ["Festival Drum","🥁"], ["Fireworks Display","🎆"], ["Dragon Dance","🐉"],
-    ["Drunken Dragon Parade","🐲"], ["A-Ma Festival Procession","⛩️"], ["Lunar New Year Gala","🎊"]
+    ["La Tomatina","🍅"], ["Songkran","💦"], ["Cherry Blossom Festival","🌸"],
+    ["Day of the Dead","💀"], ["Holi","🎨"], ["Mardi Gras","🎭"],
+    ["Halloween","🎃"], ["Diwali","🪔"], ["Oktoberfest","🍺"],
+    ["Rio Carnival","🎉"], ["Christmas","🎄"], ["Chinese New Year","🧧"]
   ],
   yellow: [
-    ["Almond Cookie","🍪"], ["Pork Chop Bun","🍔"], ["Egg Tart","🥧"],
-    ["Beef Jerky","🥓"], ["Serradura Pudding","🍮"], ["Crab Congee","🦀"],
-    ["Minchi","🍛"], ["African Chicken","🍗"], ["Portuguese Seafood Rice","🥘"],
-    ["Cha Gordo Tea Feast","🫖"], ["Dim Sum Feast","🥟"], ["Imperial Banquet","🍲"]
+    ["Fish and Chips","🍟"], ["Kimchi","🥬"], ["Tacos","🌮"],
+    ["Croissant","🥐"], ["Paella","🥘"], ["Hot Pot","🍲"],
+    ["Curry","🍛"], ["Ramen","🍜"], ["Peking Duck","🦆"],
+    ["Hamburger","🍔"], ["Pizza","🍕"], ["Sushi","🍣"]
   ],
   blue: [
-    ["Hac Sa Beach","🏖️"], ["Coloane Village","🏡"], ["Taipa Houses","🏘️"],
-    ["St. Dominic's Church","⛪"], ["Senado Square","🛕"], ["A-Ma Temple","🏯"],
-    ["Guia Fortress & Lighthouse","🗼"], ["Macau Tower","🌉"], ["Ruins of St. Paul's","🏛️"],
-    ["Kun Iam Statue","🗽"], ["Grand Lisboa Skyline","🌃"], ["Historic Centre of Macau","🏰"]
+    ["Golden Gate Bridge","🌉"], ["Angkor Wat","🛕"], ["Mount Fuji","🗻"],
+    ["Acropolis","🏛️"], ["Sagrada Familia","⛪"], ["Machu Picchu","🏔️"],
+    ["Colosseum","🏟️"], ["Great Wall of China","🧱"], ["Taj Mahal","🕌"],
+    ["Pyramids of Giza","🐪"], ["Eiffel Tower","🗼"], ["Statue of Liberty","🗽"]
   ],
   green: [
-    ["Coin Pusher","🪙"], ["Claw Machine","🧸"], ["Arcade Corner","🕹️"],
-    ["Karaoke Night","🎤"], ["Golden Reel","🎡"], ["VR Experience","🥽"],
-    ["House of Dancing Water","💃"], ["Cotai Strip Resorts","🏨"], ["Macau Grand Prix","🏎️"],
-    ["Concert Arena","🎪"], ["Mega Casino Resort","🎰"], ["High Roller Suite","🃏"]
+    ["Karaoke","🎤"], ["Circus","🎪"], ["Ballet","🩰"],
+    ["Opera","🎭"], ["Jazz","🎷"], ["Bollywood","🕺"],
+    ["Anime","🎌"], ["Broadway","🎼"], ["K-pop","🎧"],
+    ["Disneyland","🏰"], ["Video Games","🎮"], ["Hollywood","🎬"]
   ]
 };
 
 const COLOR_META = {
-  red:    { label: "Festive Heritage",      rank: 3, chip: "🔴" },
-  yellow: { label: "Gastronomy",            rank: 2, chip: "🟡" },
-  blue:   { label: "Landmarks",             rank: 1, chip: "🔵" },
-  green:  { label: "Modern Entertainment",  rank: 0, chip: "🟢" }
+  red:    { label: "Festivals",      rank: 3, chip: "🔴" },
+  yellow: { label: "Gastronomy",     rank: 2, chip: "🟡" },
+  blue:   { label: "Landmarks",      rank: 1, chip: "🔵" },
+  green:  { label: "Entertainment",  rank: 0, chip: "🟢" }
 };
 
 // Scripted Demo Mode: a fixed exhibition game that demonstrates every rule.
-// The lesson arc: Player B loses 4 of 5 pots but wins EVERYTHING by never
-// pulling the Gacha and keeping a suit collection — discipline beats spending.
+// The lesson arc: Player B loses 4 of 5 pots but takes the larger settlement share
+// by never pulling the Gacha and keeping a suit collection — discipline beats spending.
 const DEMO_SCRIPT = [
   { p0: ['red', 9],     p1: ['yellow', 5], gacha: [false, false] },                     // R1: higher card wins
   { p0: ['red', 7],     p1: ['green', 7],  gacha: [false, false] },                     // R2: tie -> suit rank
@@ -671,7 +671,7 @@ function newGame(withIntro){
   if (withIntro){ openIntro(); }
   else if (demoMode){
     demoNote("<b>SETUP</b> ：Buy-in: each player inserts $80 → 800 pts (1 pt = $0.10).<br>" +
-      "Deck: 48 cultural cards, 4 suits ：Red Festive Heritage, Yellow Gastronomy, Blue Landmarks, Green Modern Entertainment （values 1–12 each）.");
+      "Deck: 48 world-famous cards, 4 suits ：Red Festivals, Yellow Gastronomy, Blue Landmarks, Green Entertainment （values 1–12 each）.");
     demoAfter(() => {
       demoNote("<b>SETUP</b> ：Each player is dealt 3 cards; the duel lasts 5 rounds.<br>" +
         "Every round has 4 steps ：(1) fixed bet → (2) secret play & reveal → (3) free draw → (4) optional Gacha.");
@@ -1416,8 +1416,8 @@ function closeModal(){
 
 function openIntro(){
   openModal(
-    '<div class="intro-logo">🎴 MACAU GACHA</div>' +
-    '<div class="intro-suits">🔴 Festive Heritage · 🟡 Gastronomy<br>🔵 Landmarks · 🟢 Modern Entertainment</div>' +
+    '<div class="intro-logo">🎴 WORLD GACHA</div>' +
+    '<div class="intro-suits">🔴 Festivals · 🟡 Gastronomy<br>🔵 Landmarks · 🟢 Entertainment</div>' +
     '<div class="intro-steps">' +
       '<div><b>1</b> Forced bet 100–200 pts & play a card face-down</div>' +
       '<div><b>2</b> Higher value takes the pot (🔴 &gt; 🟡 &gt; 🔵 &gt; 🟢)</div>' +
@@ -1444,8 +1444,8 @@ function openRules(){
       '<li>Each player starts with 3 random cards. Deck: 48 cultural cards — 4 suits with values 1–12 each.</li>' +
     '</ul>' +
     '<h3>🎨 The Four Suits</h3>' +
-    '<p>🔴 <b>Red</b> — Festive Heritage &nbsp;·&nbsp; 🟡 <b>Yellow</b> — Gastronomy<br>' +
-    '🔵 <b>Blue</b> — Landmarks &nbsp;·&nbsp; 🟢 <b>Green</b> — Modern Entertainment</p>' +
+    '<p>🔴 <b>Red</b> — Festivals &nbsp;·&nbsp; 🟡 <b>Yellow</b> — Gastronomy<br>' +
+    '🔵 <b>Blue</b> — Landmarks &nbsp;·&nbsp; 🟢 <b>Green</b> — Entertainment</p>' +
     '<h3>🔁 Each Round — 4 Steps</h3>' +
     '<ol>' +
       '<li><b>Forced Bet</b> — Rounds 1–2: 100 pts ($10) each → pot 200 pts. Rounds 3–5: 200 pts ($20) each → pot 400 pts. Nobody can raise or fold — the bet is automatic.</li>' +
